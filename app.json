@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "AgriHub",
+    "slug": "agrihub",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#ffffff",
+    "android": {
+      "package": "com.agrihub.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#e8f5e9"
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.agrihub.app"
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "AgriHub needs access to your photos to set a profile picture."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "0acc9551-d3fa-4fbd-9932-14e0b513806e"
+      }
+    },
+    "owner": "rechiel"
+  }
+}
