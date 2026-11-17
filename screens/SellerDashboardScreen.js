@@ -30,9 +30,9 @@ export default function SellerDashboardScreen({ navigation }) {
             onPress={() => navigation.navigate('MyProducts')}
           >
             <View style={styles.menuIcon}>
-              <Text style={styles.iconEmoji}>📦</Text>
+              <Text style={styles.iconEmoji}>🛒</Text>
             </View>
-            <Text style={styles.menuLabel}>My Products</Text>
+            <Text style={styles.menuLabel}>Marketplace</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -85,8 +85,8 @@ export default function SellerDashboardScreen({ navigation }) {
           <Text style={[styles.navLabel, styles.navLabelActive]}>Menu</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('MyProducts')}>
-          <Text style={styles.navIcon}>📦</Text>
-          <Text style={styles.navLabel}>Products</Text>
+          <Text style={styles.navIcon}>🛒</Text>
+          <Text style={styles.navLabel}>Marketplace</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Add', { mode: 'listing' })}>
           <Text style={styles.navIcon}>➕</Text>

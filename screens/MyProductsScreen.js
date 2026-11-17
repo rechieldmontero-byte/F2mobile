@@ -4,15 +4,6 @@ import { useFocusEffect } from '@react-navigation/native';
 import { supabase } from '../lib/supabase';
 import { showAlert } from '../utils/alert';
 
-const CATEGORIES = [
-  { name: 'All', icon: '📦' },
-  { name: 'Fruits', icon: '🍎' },
-  { name: 'Vegetables', icon: '🥬' },
-  { name: 'Meats', icon: '🍗' },
-  { name: 'Dairy', icon: '🥛' },
-  { name: 'Grains', icon: '🌾' },
-  { name: 'Other', icon: '📦' },
-];
 const STATUS_OPTIONS = ['available', 'out_of_stock', 'inactive'];
 
 export default function MyProductsScreen({ navigation }) {
@@ -20,7 +11,6 @@ export default function MyProductsScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedStatus, setSelectedStatus] = useState('All');
   const [editingProduct, setEditingProduct] = useState(null);
 
@@ -53,10 +43,10 @@ export default function MyProductsScreen({ navigation }) {
 
   const fetchProducts = async (uid) => {
     try {
+      // Fetch all products (marketplace view)
       const { data, error } = await supabase
         .from('products')
         .select('*')
-        .eq('user_id', uid)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -120,9 +110,8 @@ export default function MyProductsScreen({ navigation }) {
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory.toLowerCase();
     const matchesStatus = selectedStatus === 'All' || product.status === selectedStatus;
-    return matchesSearch && matchesCategory && matchesStatus;
+    return matchesSearch && matchesStatus;
   });
 
   const getStatusColor = (status) => {
@@ -150,7 +139,7 @@ export default function MyProductsScreen({ navigation }) {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
             <Text style={styles.backText}>←</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>My Products</Text>
+          <Text style={styles.headerTitle}>Marketplace</Text>
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#2e7d32" />
@@ -166,7 +155,7 @@ export default function MyProductsScreen({ navigation }) {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Text style={styles.backText}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>My Products</Text>
+        <Text style={styles.headerTitle}>Marketplace</Text>
       </View>
 
       <View style={styles.searchBar}>
@@ -177,21 +166,6 @@ export default function MyProductsScreen({ navigation }) {
           onChangeText={setSearchQuery}
         />
       </View>
-
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll}>
-        {CATEGORIES.map((category) => (
-          <TouchableOpacity
-            key={category.name}
-            style={[styles.categoryChip, selectedCategory === category.name && styles.categoryChipActive]}
-            onPress={() => setSelectedCategory(category.name)}
-          >
-            <Text style={styles.categoryChipIcon}>{category.icon}</Text>
-            <Text style={[styles.categoryChipText, selectedCategory === category.name && styles.categoryChipTextActive]}>
-              {category.name}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.statusScroll}>
         <TouchableOpacity
@@ -218,7 +192,7 @@ export default function MyProductsScreen({ navigation }) {
       {filteredProducts.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyIcon}>📦</Text>
-          <Text style={styles.emptyTitle}>You haven't listed any products yet.</Text>
+          <Text style={styles.emptyTitle}>No products found</Text>
           <TouchableOpacity
             style={styles.addButton}
             onPress={() => navigation.navigate('Add', { mode: 'listing' })}
@@ -230,13 +204,18 @@ export default function MyProductsScreen({ navigation }) {
         <FlatList
           data={filteredProducts}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
+          renderItem={({ item }) => {
+            const isOwner = item.user_id === userId;
+            return (
             <View style={styles.productCard}>
               <View style={styles.productHeader}>
                 <Text style={styles.productEmoji}>{item.image || '📦'}</Text>
                 <View style={styles.productInfo}>
                   <Text style={styles.productName}>{item.name}</Text>
                   <Text style={styles.productCategory}>{item.category}</Text>
+                  {!isOwner && (
+                    <Text style={styles.otherSellerBadge}>Other Seller</Text>
+                  )}
                 </View>
                 <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
                   <Text style={styles.statusBadgeText}>{getStatusLabel(item.status)}</Text>
@@ -266,36 +245,43 @@ export default function MyProductsScreen({ navigation }) {
                 >
                   <Text style={styles.viewButtonText}>View</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.editButton}
-                  onPress={() => handleEdit(item)}
-                >
-                  <Text style={styles.editButtonText}>Edit</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.deleteButton}
-                  onPress={() => handleDelete(item.id)}
-                >
-                  <Text style={styles.deleteButtonText}>Delete</Text>
-                </TouchableOpacity>
+                {isOwner && (
+                  <>
+                    <TouchableOpacity
+                      style={styles.editButton}
+                      onPress={() => handleEdit(item)}
+                    >
+                      <Text style={styles.editButtonText}>Edit</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.deleteButton}
+                      onPress={() => handleDelete(item.id)}
+                    >
+                      <Text style={styles.deleteButtonText}>Delete</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
               </View>
 
-              <View style={styles.statusRow}>
-                <Text style={styles.statusLabel}>Status:</Text>
-                {STATUS_OPTIONS.map((status) => (
-                  <TouchableOpacity
-                    key={status}
-                    style={[styles.statusOption, item.status === status && styles.statusOptionActive]}
-                    onPress={() => handleStatusChange(item.id, status)}
-                  >
-                    <Text style={[styles.statusOptionText, item.status === status && styles.statusOptionTextActive]}>
-                      {getStatusLabel(status)}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
+              {isOwner && (
+                <View style={styles.statusRow}>
+                  <Text style={styles.statusLabel}>Status:</Text>
+                  {STATUS_OPTIONS.map((status) => (
+                    <TouchableOpacity
+                      key={status}
+                      style={[styles.statusOption, item.status === status && styles.statusOptionActive]}
+                      onPress={() => handleStatusChange(item.id, status)}
+                    >
+                      <Text style={[styles.statusOptionText, item.status === status && styles.statusOptionTextActive]}>
+                        {getStatusLabel(status)}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
             </View>
-          )}
+            );
+          }}
           contentContainerStyle={styles.listContent}
         />
       )}
@@ -347,34 +333,6 @@ const styles = StyleSheet.create({
   searchInput: {
     fontSize: 16,
     padding: 8,
-  },
-  categoryScroll: {
-    paddingHorizontal: 16,
-    marginBottom: 12,
-  },
-  categoryChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#f5f5f5',
-    marginRight: 8,
-  },
-  categoryChipActive: {
-    backgroundColor: '#2e7d32',
-  },
-  categoryChipText: {
-    fontSize: 13,
-    color: '#666',
-    fontWeight: '600',
-  },
-  categoryChipTextActive: {
-    color: '#fff',
-  },
-  categoryChipIcon: {
-    fontSize: 14,
-    marginRight: 4,
   },
   statusScroll: {
     paddingHorizontal: 16,
@@ -458,6 +416,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
     marginTop: 2,
+  },
+  otherSellerBadge: {
+    fontSize: 10,
+    color: '#888',
+    marginTop: 4,
+    fontStyle: 'italic',
   },
   statusBadge: {
     paddingHorizontal: 10,
