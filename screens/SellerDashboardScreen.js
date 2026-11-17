@@ -189,7 +189,6 @@ export default function SellerDashboardScreen({ navigation }) {
       <ScrollView style={styles.content}>
         <View style={styles.welcomeCard}>
           <View style={styles.welcomeHeader}>
-            <Image source={logo} style={styles.welcomeLogo} />
             <View style={styles.welcomeTextContainer}>
               <Text style={styles.welcomeTitle}>Hello, {userName}!</Text>
               <Text style={styles.welcomeSubtitle}>Presko Baratu tatak ADSSU</Text>
@@ -345,12 +344,6 @@ const styles = StyleSheet.create({
 <|open|>argument key="new_string" type="string"<|sep|>  welcomeHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  welcomeLogo: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginRight: 16,
   },
   welcomeTextContainer: {
     flex: 1,
