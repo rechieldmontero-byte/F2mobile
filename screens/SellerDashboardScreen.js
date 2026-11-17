@@ -19,6 +19,7 @@ export default function SellerDashboardScreen({ navigation }) {
   });
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [userName, setUserName] = useState('');
 
   const categoryIcons = {
     fruits: '🍎',
@@ -37,6 +38,17 @@ export default function SellerDashboardScreen({ navigation }) {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+
+      // Fetch user profile for name
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, username')
+        .eq('id', user.id)
+        .single();
+
+      if (profile) {
+        setUserName(profile.full_name || profile.username || 'Seller');
+      }
 
       // Fetch seller's products
       const { data: products } = await supabase
@@ -142,6 +154,7 @@ export default function SellerDashboardScreen({ navigation }) {
       </View>
     );
   }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -150,8 +163,8 @@ export default function SellerDashboardScreen({ navigation }) {
 
       <ScrollView style={styles.content}>
         <View style={styles.welcomeCard}>
-          <Text style={styles.welcomeTitle}>Seller Dashboard</Text>
-          <Text style={styles.welcomeSubtitle}>Manage your farm and sales</Text>
+          <Text style={styles.welcomeTitle}>Hello, {userName}!</Text>
+          <Text style={styles.welcomeSubtitle}>Welcome back to your seller dashboard</Text>
         </View>
 
         <View style={styles.searchContainer}>
