@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, FlatList, ActivityIndicator, Alert } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { supabase } from '../lib/supabase';
 import { showAlert } from '../utils/alert';
 
@@ -18,6 +19,14 @@ export default function MyProductsScreen({ navigation }) {
   useEffect(() => {
     fetchUserAndProducts();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (userId) {
+        fetchProducts(userId);
+      }
+    }, [userId])
+  );
 
   const fetchUserAndProducts = async () => {
     try {
