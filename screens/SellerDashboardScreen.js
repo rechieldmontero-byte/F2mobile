@@ -21,6 +21,7 @@ export default function SellerDashboardScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [userName, setUserName] = useState('');
+  const [profileImage, setProfileImage] = useState(null);
 
   const categoryIcons = {
     fruits: '🍎',
@@ -40,15 +41,16 @@ export default function SellerDashboardScreen({ navigation }) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Fetch user profile for name
+      // Fetch user profile for name and image
       const { data: profile } = await supabase
         .from('profiles')
-        .select('full_name, username')
+        .select('full_name, username, avatar_url')
         .eq('id', user.id)
         .single();
 
       if (profile) {
         setUserName(profile.full_name || profile.username || 'Seller');
+        setProfileImage(profile.avatar_url || null);
       }
 
       // Fetch seller's products
@@ -168,7 +170,13 @@ export default function SellerDashboardScreen({ navigation }) {
             <Image source={logo} style={styles.welcomeLogo} />
             <View style={styles.welcomeTextContainer}>
               <Text style={styles.welcomeTitle}>Hello, {userName}!</Text>
-              <Text style={styles.welcomeSubtitle}>Presko Baratu tatak ADSSU ING</Text>
+              <Text style={styles.welcomeSubtitle}>Presko Baratu tatak ADSSU</Text>
+            </View>
+            <View style={styles.profileContainer}>
+              <Image
+                source={profileImage && profileImage.startsWith('http') ? { uri: profileImage } : logo}
+                style={styles.profileImage}
+              />
             </View>
           </View>
         </View>
@@ -298,6 +306,16 @@ const styles = StyleSheet.create({
   welcomeSubtitle: {
     fontSize: 14,
     color: '#666',
+  },
+  profileContainer: {
+    marginLeft: 16,
+  },
+  profileImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    borderWidth: 2,
+    borderColor: '#2e7d32',
   },
   searchContainer: {
     marginBottom: 16,
