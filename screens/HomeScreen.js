@@ -58,48 +58,6 @@ export default function HomeScreen({ navigation }) {
           <Text style={styles.bannerSubtitle}>UP TO 70% OFF</Text>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Activity</Text>
-          <View style={styles.activityGrid}>
-            <TouchableOpacity
-              style={styles.activityItem}
-              onPress={() => navigation.navigate('Activity', { tab: 'Supply' })}
-            >
-              <View style={styles.activityIcon}>
-                <Text style={styles.iconEmoji}>📦</Text>
-              </View>
-              <Text style={styles.activityLabel}>Supply</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.activityItem}
-              onPress={() => navigation.navigate('Activity', { tab: 'Group Buying' })}
-            >
-              <View style={styles.activityIcon}>
-                <Text style={styles.iconEmoji}>👥</Text>
-              </View>
-              <Text style={styles.activityLabel}>Group Buying</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.activityItem}
-              onPress={() => navigation.navigate('Activity', { tab: 'Fulfillment' })}
-            >
-              <View style={styles.activityIcon}>
-                <Text style={styles.iconEmoji}>🚚</Text>
-              </View>
-              <Text style={styles.activityLabel}>Fulfillment</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.activityItem}
-              onPress={() => navigation.navigate('Activity', { tab: 'Auction' })}
-            >
-              <View style={styles.activityIcon}>
-                <Text style={styles.iconEmoji}>🔨</Text>
-              </View>
-              <Text style={styles.activityLabel}>Auction</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
         {userType === 'seller' && (
           <View style={styles.sellerSection}>
             <Text style={styles.sectionTitle}>Seller Dashboard</Text>
@@ -172,6 +130,48 @@ export default function HomeScreen({ navigation }) {
               <Text style={styles.productPrice}>₱45/kg</Text>
             </View>
           </ScrollView>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Activity</Text>
+          <View style={styles.activityGrid}>
+            <TouchableOpacity
+              style={styles.activityItem}
+              onPress={() => navigation.navigate('Activity', { tab: 'Supply' })}
+            >
+              <View style={styles.activityIcon}>
+                <Text style={styles.iconEmoji}>📦</Text>
+              </View>
+              <Text style={styles.activityLabel}>Supply</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.activityItem}
+              onPress={() => navigation.navigate('Activity', { tab: 'Group Buying' })}
+            >
+              <View style={styles.activityIcon}>
+                <Text style={styles.iconEmoji}>👥</Text>
+              </View>
+              <Text style={styles.activityLabel}>Group Buying</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.activityItem}
+              onPress={() => navigation.navigate('Activity', { tab: 'Fulfillment' })}
+            >
+              <View style={styles.activityIcon}>
+                <Text style={styles.iconEmoji}>🚚</Text>
+              </View>
+              <Text style={styles.activityLabel}>Fulfillment</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.activityItem}
+              onPress={() => navigation.navigate('Activity', { tab: 'Auction' })}
+            >
+              <View style={styles.activityIcon}>
+                <Text style={styles.iconEmoji}>🔨</Text>
+              </View>
+              <Text style={styles.activityLabel}>Auction</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
 
