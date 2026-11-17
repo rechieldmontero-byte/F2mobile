@@ -27,7 +27,7 @@ export default function SellerDashboardScreen({ navigation }) {
 
           <TouchableOpacity
             style={styles.menuItem}
-            onPress={() => navigation.navigate('ProductList')}
+            onPress={() => navigation.navigate('MyProducts')}
           >
             <View style={styles.menuIcon}>
               <Text style={styles.iconEmoji}>📦</Text>
@@ -84,7 +84,7 @@ export default function SellerDashboardScreen({ navigation }) {
           <Text style={[styles.navIcon, styles.navIconActive]}>⊞</Text>
           <Text style={[styles.navLabel, styles.navLabelActive]}>Menu</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('ProductList')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('MyProducts')}>
           <Text style={styles.navIcon}>📦</Text>
           <Text style={styles.navLabel}>Products</Text>
         </TouchableOpacity>

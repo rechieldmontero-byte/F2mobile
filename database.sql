@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS products (
   quantity TEXT,
   category TEXT NOT NULL,
   image TEXT,
+  status TEXT DEFAULT 'available',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -31,6 +32,7 @@ END $$;
 
 -- Add missing columns if products table already existed with older schema
 ALTER TABLE products ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'available';
 ALTER TABLE products ADD COLUMN IF NOT EXISTS description TEXT;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS price DECIMAL(10,2);
 ALTER TABLE products ADD COLUMN IF NOT EXISTS original_price DECIMAL(10,2);
