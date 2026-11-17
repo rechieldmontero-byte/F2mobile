@@ -21,6 +21,10 @@ export default function HomeScreen({ navigation }) {
           .single();
         if (profile?.account_type) {
           setUserType(profile.account_type);
+          // Navigate sellers to Seller Dashboard
+          if (profile.account_type === 'seller') {
+            navigation.replace('SellerDashboard');
+          }
         }
         if (profile?.full_name) {
           setUserName(profile.full_name);
@@ -57,41 +61,6 @@ export default function HomeScreen({ navigation }) {
           <Text style={styles.bannerTitle}>VEGETARIAN BIG SALE</Text>
           <Text style={styles.bannerSubtitle}>UP TO 70% OFF</Text>
         </View>
-
-        {userType === 'seller' && (
-          <View style={styles.sellerSection}>
-            <Text style={styles.sectionTitle}>Seller Dashboard</Text>
-            <View style={styles.sellerGrid}>
-              <TouchableOpacity
-                style={styles.sellerItem}
-                onPress={() => navigation.navigate('Add', { mode: 'listing' })}
-              >
-                <View style={styles.sellerIcon}>
-                  <Text style={styles.iconEmoji}>➕</Text>
-                </View>
-                <Text style={styles.sellerLabel}>Add Product</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.sellerItem}
-                onPress={() => navigation.navigate('Orders')}
-              >
-                <View style={styles.sellerIcon}>
-                  <Text style={styles.iconEmoji}>📋</Text>
-                </View>
-                <Text style={styles.sellerLabel}>My Orders</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.sellerItem}
-                onPress={() => navigation.navigate('Analytics')}
-              >
-                <View style={styles.sellerIcon}>
-                  <Text style={styles.iconEmoji}>📊</Text>
-                </View>
-                <Text style={styles.sellerLabel}>Analytics</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>

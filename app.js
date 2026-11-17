@@ -20,6 +20,7 @@ import ChangePasswordScreen from './screens/ChangePasswordScreen';
 import NotificationsScreen from './screens/NotificationsScreen';
 import AnalyticsScreen from './screens/AnalyticsScreen';
 import CheckoutScreen from './screens/CheckoutScreen';
+import SellerDashboardScreen from './screens/SellerDashboardScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -120,6 +121,11 @@ export default function App() {
         <Stack.Screen
           name="Checkout"
           component={CheckoutScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="SellerDashboard"
+          component={SellerDashboardScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
