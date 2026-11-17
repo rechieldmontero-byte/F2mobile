@@ -310,6 +310,70 @@ CREATE TABLE IF NOT EXISTS requests (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- ============================================
+-- 7. GROUP_BUYING TABLE (bulk orders for discounts)
+-- ============================================
+CREATE TABLE IF NOT EXISTS group_buying (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT,
+  category TEXT,
+  target_quantity INTEGER NOT NULL,
+  current_quantity INTEGER DEFAULT 0,
+  unit_price DECIMAL(10,2) NOT NULL,
+  target_price DECIMAL(10,2),
+  status TEXT DEFAULT 'open',
+  deadline TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- ============================================
+-- 8. AUCTIONS TABLE (bidding system)
+-- ============================================
+CREATE TABLE IF NOT EXISTS auctions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT,
+  category TEXT,
+  starting_bid DECIMAL(10,2) NOT NULL,
+  current_bid DECIMAL(10,2),
+  reserve_price DECIMAL(10,2),
+  status TEXT DEFAULT 'active',
+  end_time TIMESTAMP WITH TIME ZONE NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- ============================================
+-- 9. AUCTION_BIDS TABLE (bids on auctions)
+-- ============================================
+CREATE TABLE IF NOT EXISTS auction_bids (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  auction_id UUID REFERENCES auctions(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  bid_amount DECIMAL(10,2) NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- ============================================
+-- 10. DELIVERIES TABLE (fulfillment tracking)
+-- ============================================
+CREATE TABLE IF NOT EXISTS deliveries (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID REFERENCES orders(id) ON DELETE CASCADE,
+  status TEXT DEFAULT 'pending',
+  tracking_number TEXT,
+  carrier TEXT,
+  estimated_delivery TIMESTAMP WITH TIME ZONE,
+  actual_delivery TIMESTAMP WITH TIME ZONE,
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Add missing columns if order_items table already existed with older schema
 ALTER TABLE order_items ADD COLUMN IF NOT EXISTS order_id UUID REFERENCES orders(id) ON DELETE CASCADE;
 ALTER TABLE order_items ADD COLUMN IF NOT EXISTS product_id UUID REFERENCES products(id) ON DELETE CASCADE;
@@ -335,6 +399,50 @@ ALTER TABLE requests ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'open';
 ALTER TABLE requests ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
 ALTER TABLE requests ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
 
+-- Add missing columns for group_buying table
+ALTER TABLE group_buying ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE group_buying ADD COLUMN IF NOT EXISTS title TEXT;
+ALTER TABLE group_buying ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE group_buying ADD COLUMN IF NOT EXISTS category TEXT;
+ALTER TABLE group_buying ADD COLUMN IF NOT EXISTS target_quantity INTEGER;
+ALTER TABLE group_buying ADD COLUMN IF NOT EXISTS current_quantity INTEGER DEFAULT 0;
+ALTER TABLE group_buying ADD COLUMN IF NOT EXISTS unit_price DECIMAL(10,2);
+ALTER TABLE group_buying ADD COLUMN IF NOT EXISTS target_price DECIMAL(10,2);
+ALTER TABLE group_buying ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'open';
+ALTER TABLE group_buying ADD COLUMN IF NOT EXISTS deadline TIMESTAMP WITH TIME ZONE;
+ALTER TABLE group_buying ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+ALTER TABLE group_buying ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+
+-- Add missing columns for auctions table
+ALTER TABLE auctions ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE auctions ADD COLUMN IF NOT EXISTS title TEXT;
+ALTER TABLE auctions ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE auctions ADD COLUMN IF NOT EXISTS category TEXT;
+ALTER TABLE auctions ADD COLUMN IF NOT EXISTS starting_bid DECIMAL(10,2);
+ALTER TABLE auctions ADD COLUMN IF NOT EXISTS current_bid DECIMAL(10,2);
+ALTER TABLE auctions ADD COLUMN IF NOT EXISTS reserve_price DECIMAL(10,2);
+ALTER TABLE auctions ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'active';
+ALTER TABLE auctions ADD COLUMN IF NOT EXISTS end_time TIMESTAMP WITH TIME ZONE;
+ALTER TABLE auctions ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+ALTER TABLE auctions ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+
+-- Add missing columns for auction_bids table
+ALTER TABLE auction_bids ADD COLUMN IF NOT EXISTS auction_id UUID REFERENCES auctions(id) ON DELETE CASCADE;
+ALTER TABLE auction_bids ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE auction_bids ADD COLUMN IF NOT EXISTS bid_amount DECIMAL(10,2);
+ALTER TABLE auction_bids ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+
+-- Add missing columns for deliveries table
+ALTER TABLE deliveries ADD COLUMN IF NOT EXISTS order_id UUID REFERENCES orders(id) ON DELETE CASCADE;
+ALTER TABLE deliveries ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending';
+ALTER TABLE deliveries ADD COLUMN IF NOT EXISTS tracking_number TEXT;
+ALTER TABLE deliveries ADD COLUMN IF NOT EXISTS carrier TEXT;
+ALTER TABLE deliveries ADD COLUMN IF NOT EXISTS estimated_delivery TIMESTAMP WITH TIME ZONE;
+ALTER TABLE deliveries ADD COLUMN IF NOT EXISTS actual_delivery TIMESTAMP WITH TIME ZONE;
+ALTER TABLE deliveries ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE deliveries ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+ALTER TABLE deliveries ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+
 -- ============================================
 -- ROW LEVEL SECURITY (RLS)
 -- ============================================
@@ -345,7 +453,7 @@ DECLARE r RECORD;
 BEGIN
   FOR r IN SELECT schemaname, tablename, policyname FROM pg_policies
            WHERE schemaname = 'public'
-             AND tablename IN ('products','profiles','orders','order_items','saved_products','requests') LOOP
+             AND tablename IN ('products','profiles','orders','order_items','saved_products','requests','group_buying','auctions','auction_bids','deliveries') LOOP
     EXECUTE format('DROP POLICY %I ON %I.%I', r.policyname, r.schemaname, r.tablename);
   END LOOP;
 END $$;
@@ -357,6 +465,10 @@ ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE saved_products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE group_buying ENABLE ROW LEVEL SECURITY;
+ALTER TABLE auctions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE auction_bids ENABLE ROW LEVEL SECURITY;
+ALTER TABLE deliveries ENABLE ROW LEVEL SECURITY;
 
 -- Products policies
 DROP POLICY IF EXISTS "Public read products" ON products;
@@ -494,6 +606,79 @@ CREATE POLICY "Users can delete own requests"
   ON requests FOR DELETE
   USING (auth.uid() = user_id);
 
+-- Group Buying policies
+DROP POLICY IF EXISTS "Public read group_buying" ON group_buying;
+DROP POLICY IF EXISTS "Users can insert own group_buying" ON group_buying;
+DROP POLICY IF EXISTS "Users can update own group_buying" ON group_buying;
+DROP POLICY IF EXISTS "Users can delete own group_buying" ON group_buying;
+
+CREATE POLICY "Public read group_buying"
+  ON group_buying FOR SELECT
+  USING (true);
+
+CREATE POLICY "Users can insert own group_buying"
+  ON group_buying FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own group_buying"
+  ON group_buying FOR UPDATE
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own group_buying"
+  ON group_buying FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- Auctions policies
+DROP POLICY IF EXISTS "Public read auctions" ON auctions;
+DROP POLICY IF EXISTS "Users can insert own auctions" ON auctions;
+DROP POLICY IF EXISTS "Users can update own auctions" ON auctions;
+DROP POLICY IF EXISTS "Users can delete own auctions" ON auctions;
+
+CREATE POLICY "Public read auctions"
+  ON auctions FOR SELECT
+  USING (true);
+
+CREATE POLICY "Users can insert own auctions"
+  ON auctions FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own auctions"
+  ON auctions FOR UPDATE
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own auctions"
+  ON auctions FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- Auction Bids policies
+DROP POLICY IF EXISTS "Users can read own auction_bids" ON auction_bids;
+DROP POLICY IF EXISTS "Users can insert own auction_bids" ON auction_bids;
+
+CREATE POLICY "Users can read own auction_bids"
+  ON auction_bids FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own auction_bids"
+  ON auction_bids FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+-- Deliveries policies
+DROP POLICY IF EXISTS "Users can read own deliveries" ON deliveries;
+DROP POLICY IF EXISTS "Users can insert own deliveries" ON deliveries;
+DROP POLICY IF EXISTS "Users can update own deliveries" ON deliveries;
+
+CREATE POLICY "Users can read own deliveries"
+  ON deliveries FOR SELECT
+  USING (auth.uid() = (SELECT buyer_id FROM orders WHERE orders.id = deliveries.order_id));
+
+CREATE POLICY "Users can insert own deliveries"
+  ON deliveries FOR INSERT
+  WITH CHECK (auth.uid() = (SELECT buyer_id FROM orders WHERE orders.id = deliveries.order_id));
+
+CREATE POLICY "Users can update own deliveries"
+  ON deliveries FOR UPDATE
+  USING (auth.uid() = (SELECT buyer_id FROM orders WHERE orders.id = deliveries.order_id));
+
 -- ============================================
 -- INDEXES (for performance)
 -- ============================================
@@ -504,6 +689,13 @@ CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id);
 CREATE INDEX IF NOT EXISTS idx_saved_products_user_id ON saved_products(user_id);
 CREATE INDEX IF NOT EXISTS idx_saved_products_product_id ON saved_products(product_id);
 CREATE INDEX IF NOT EXISTS idx_requests_user_id ON requests(user_id);
+CREATE INDEX IF NOT EXISTS idx_group_buying_user_id ON group_buying(user_id);
+CREATE INDEX IF NOT EXISTS idx_group_buying_status ON group_buying(status);
+CREATE INDEX IF NOT EXISTS idx_auctions_user_id ON auctions(user_id);
+CREATE INDEX IF NOT EXISTS idx_auctions_status ON auctions(status);
+CREATE INDEX IF NOT EXISTS idx_auction_bids_auction_id ON auction_bids(auction_id);
+CREATE INDEX IF NOT EXISTS idx_deliveries_order_id ON deliveries(order_id);
+CREATE INDEX IF NOT EXISTS idx_deliveries_status ON deliveries(status);
 
 -- ============================================
 -- DONE! Schema created successfully.

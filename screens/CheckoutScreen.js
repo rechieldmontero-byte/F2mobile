@@ -75,12 +75,12 @@ export default function CheckoutScreen({ navigation, route }) {
         }
       }
 
-      // Auto-navigate to Dashboard after successful order
+      // Auto-navigate to Orders after successful order
       showAlert(
         'Order Placed!',
         `Your order of ₱${total.toLocaleString()} has been placed successfully. Payment method: ${PAYMENT_METHODS.find(m => m.id === paymentMethod)?.label}.`
       );
-      navigation.replace('Home');
+      navigation.replace('Orders');
     } catch (error) {
       console.error('Order error:', error);
       showAlert('Error', error.message || 'Failed to place order');

@@ -1,16 +1,153 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, ActivityIndicator, RefreshControl } from 'react-native';
+import { supabase } from '../lib/supabase';
 
 const TABS = ['Supply', 'Group Buying', 'Fulfillment', 'Auction'];
 
 export default function ActivityScreen({ navigation, route }) {
   const [activeTab, setActiveTab] = useState(route.params?.tab || 'Supply');
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    if (activeTab) {
+      fetchData();
+    }
+  }, [activeTab]);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setData([]);
+        return;
+      }
+
+      let query;
+      switch (activeTab) {
+        case 'Supply':
+          query = supabase.from('products').select('*').order('created_at', { ascending: false }).limit(10);
+          break;
+        case 'Group Buying':
+          query = supabase.from('group_buying').select('*').eq('status', 'open').order('created_at', { ascending: false });
+          break;
+        case 'Fulfillment':
+          query = supabase.from('deliveries').select('*, orders(*)').order('created_at', { ascending: false });
+          break;
+        case 'Auction':
+          query = supabase.from('auctions').select('*').eq('status', 'active').order('end_time', { ascending: true });
+          break;
+        default:
+          setData([]);
+          return;
+      }
+
+      const { data: result, error } = await query;
+      if (error) throw error;
+      setData(result || []);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setData([]);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchData();
+  };
+
+  const renderSupplyItem = (item) => (
+    <View key={item.id} style={styles.card}>
+      <View style={styles.cardHeader}>
+        <Text style={styles.cardName}>{item.name}</Text>
+        <Text style={styles.cardQty}>{item.quantity}</Text>
+      </View>
+      <View style={styles.cardRow}>
+        <Text style={styles.cardLabel}>Price</Text>
+        <Text style={styles.cardValue}>₱{parseFloat(item.price || 0).toLocaleString()}</Text>
+      </View>
+      <View style={styles.cardRow}>
+        <Text style={styles.cardLabel}>Category</Text>
+        <Text style={styles.cardTime}>{item.category}</Text>
+      </View>
+    </View>
+  );
+
+  const renderGroupBuyingItem = (item) => (
+    <View key={item.id} style={styles.card}>
+      <View style={styles.cardHeader}>
+        <Text style={styles.cardName}>{item.title}</Text>
+        <Text style={styles.cardQty}>{item.current_quantity}/{item.target_quantity}</Text>
+      </View>
+      <View style={styles.cardRow}>
+        <Text style={styles.cardLabel}>Unit Price</Text>
+        <Text style={styles.cardValue}>₱{parseFloat(item.unit_price || 0).toLocaleString()}</Text>
+      </View>
+      <View style={styles.cardRow}>
+        <Text style={styles.cardLabel}>Target Price</Text>
+        <Text style={styles.cardValue}>₱{parseFloat(item.target_price || 0).toLocaleString()}</Text>
+      </View>
+      <View style={styles.offersRow}>
+        <Text style={styles.offersLabel}>Status</Text>
+        <Text style={styles.offersCount}>{item.status}</Text>
+      </View>
+    </View>
+  );
+
+  const renderFulfillmentItem = (item) => (
+    <View key={item.id} style={styles.card}>
+      <View style={styles.cardHeader}>
+        <Text style={styles.cardName}>Order #{item.order_id?.slice(0, 8)}</Text>
+        <Text style={styles.cardQty}>{item.status}</Text>
+      </View>
+      <View style={styles.cardRow}>
+        <Text style={styles.cardLabel}>Carrier</Text>
+        <Text style={styles.cardValue}>{item.carrier || 'TBD'}</Text>
+      </View>
+      <View style={styles.cardRow}>
+        <Text style={styles.cardLabel}>Tracking</Text>
+        <Text style={styles.cardTime}>{item.tracking_number || 'Pending'}</Text>
+      </View>
+      {item.estimated_delivery && (
+        <View style={styles.cardRow}>
+          <Text style={styles.cardLabel}>Est. Delivery</Text>
+          <Text style={styles.cardValue}>{new Date(item.estimated_delivery).toLocaleDateString()}</Text>
+        </View>
+      )}
+    </View>
+  );
+
+  const renderAuctionItem = (item) => (
+    <View key={item.id} style={styles.card}>
+      <View style={styles.cardHeader}>
+        <Text style={styles.cardName}>{item.title}</Text>
+        <Text style={styles.cardQty}>{item.status}</Text>
+      </View>
+      <View style={styles.cardRow}>
+        <Text style={styles.cardLabel}>Current Bid</Text>
+        <Text style={styles.cardValue}>₱{parseFloat(item.current_bid || item.starting_bid || 0).toLocaleString()}</Text>
+      </View>
+      <View style={styles.cardRow}>
+        <Text style={styles.cardLabel}>Starting Bid</Text>
+        <Text style={styles.cardValue}>₱{parseFloat(item.starting_bid || 0).toLocaleString()}</Text>
+      </View>
+      <View style={styles.cardRow}>
+        <Text style={styles.cardLabel}>Ends At</Text>
+        <Text style={styles.cardTime}>{new Date(item.end_time).toLocaleString()}</Text>
+      </View>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <TouchableOpacity onPress={() => navigation.replace('Home')} style={styles.backButton}>
             <Text style={styles.backText}>←</Text>
           </TouchableOpacity>
           <View style={styles.logoSmall}>
@@ -40,68 +177,29 @@ export default function ActivityScreen({ navigation, route }) {
         <Text style={styles.filterIcon}>⚙️</Text>
       </View>
 
-      <ScrollView style={styles.content}>
-        <Text style={styles.cardTitle}>Requested Supply</Text>
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardName}>Fresh Tomato</Text>
-            <Text style={styles.cardQty}>20 KG</Text>
+      <ScrollView
+        style={styles.content}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#2e7d32']} />}
+      >
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#2e7d32" />
+            <Text style={styles.loadingText}>Loading...</Text>
           </View>
-          <View style={styles.cardRow}>
-            <Text style={styles.cardLabel}>Total Amount</Text>
-            <Text style={styles.cardValue}>₱1,250</Text>
+        ) : data.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyIcon}>📦</Text>
+            <Text style={styles.emptyTitle}>No {activeTab} items</Text>
+            <Text style={styles.emptySubtitle}>Items will appear here</Text>
           </View>
-          <View style={styles.cardRow}>
-            <Text style={styles.cardLabel}>₱62.50/KG</Text>
-            <Text style={styles.cardTime}>10:30 am, October 22</Text>
-          </View>
-          <View style={styles.offersRow}>
-            <Text style={styles.offersLabel}>Offers Received</Text>
-            <Text style={styles.offersCount}>10</Text>
-          </View>
-        </View>
-
-        <Text style={styles.cardTitle}>Purchased</Text>
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardName}>Fresh Tomato</Text>
-            <Text style={styles.cardQty}>20 KG</Text>
-          </View>
-          <View style={styles.cardRow}>
-            <Text style={styles.cardLabel}>Total Amount</Text>
-            <Text style={styles.cardValue}>₱1,250</Text>
-          </View>
-          <View style={styles.cardRow}>
-            <Text style={styles.cardLabel}>₱62.50/KG</Text>
-            <Text style={styles.cardTime}>10:30 am, October 22</Text>
-          </View>
-          <View style={styles.cardRow}>
-            <Text style={styles.cardLabel}>Harvest</Text>
-            <Text style={styles.cardValue}>30 Nov 2023</Text>
-          </View>
-          <View style={styles.statusRow}>
-            <Text style={styles.status}>Ongoing</Text>
-          </View>
-        </View>
-
-        <Text style={styles.cardTitle}>Made Offer</Text>
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardName}>Fresh Carrots</Text>
-            <Text style={styles.cardQty}>15 KG</Text>
-          </View>
-          <View style={styles.cardRow}>
-            <Text style={styles.cardLabel}>Total Amount</Text>
-            <Text style={styles.cardValue}>₱750</Text>
-          </View>
-          <View style={styles.cardRow}>
-            <Text style={styles.cardLabel}>₱50/KG</Text>
-            <Text style={styles.cardTime}>2:15 pm, October 23</Text>
-          </View>
-          <View style={styles.statusRow}>
-            <Text style={[styles.status, styles.statusPending]}>Pending</Text>
-          </View>
-        </View>
+        ) : (
+          <>
+            {activeTab === 'Supply' && data.map(renderSupplyItem)}
+            {activeTab === 'Group Buying' && data.map(renderGroupBuyingItem)}
+            {activeTab === 'Fulfillment' && data.map(renderFulfillmentItem)}
+            {activeTab === 'Auction' && data.map(renderAuctionItem)}
+          </>
+        )}
       </ScrollView>
 
       <View style={styles.bottomNav}>
@@ -216,6 +314,36 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 100,
+  },
+  loadingText: {
+    marginTop: 12,
+    color: '#666',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 100,
+  },
+  emptyIcon: {
+    fontSize: 64,
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: '#888',
   },
   cardTitle: {
     fontSize: 16,
