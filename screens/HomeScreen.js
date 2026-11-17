@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 export default function HomeScreen({ navigation }) {
   const [userType, setUserType] = useState('buyer');
   const [userName, setUserName] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchUserType();
@@ -36,8 +37,20 @@ export default function HomeScreen({ navigation }) {
       }
     } catch (error) {
       console.error('Error fetching user type:', error);
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <Text>Loading...</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -174,6 +187,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   scrollContent: {
     flex: 1,
