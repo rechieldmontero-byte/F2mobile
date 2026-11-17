@@ -118,6 +118,48 @@ export default function OrdersScreen({ navigation }) {
     return '';
   };
 
+  const handleApproveOrder = async (orderId) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: 'confirmed' })
+        .eq('id', orderId);
+
+      if (error) throw error;
+      fetchOrders(); // Refresh orders
+    } catch (error) {
+      console.error('Error approving order:', error);
+    }
+  };
+
+  const handleRejectOrder = async (orderId) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: 'cancelled' })
+        .eq('id', orderId);
+
+      if (error) throw error;
+      fetchOrders(); // Refresh orders
+    } catch (error) {
+      console.error('Error rejecting order:', error);
+    }
+  };
+
+  const handleCompleteOrder = async (orderId) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: 'completed' })
+        .eq('id', orderId);
+
+      if (error) throw error;
+      fetchOrders(); // Refresh orders
+    } catch (error) {
+      console.error('Error completing order:', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -176,6 +218,32 @@ export default function OrdersScreen({ navigation }) {
                   <Text style={styles.orderDate}>{formatDate(order.created_at)}</Text>
                   <Text style={styles.orderTotal}>₱{parseFloat(order.total_amount || 0).toLocaleString()}</Text>
                 </View>
+                {isSale && order.status === 'pending' && (
+                  <View style={styles.actionButtons}>
+                    <TouchableOpacity
+                      style={styles.approveButton}
+                      onPress={() => handleApproveOrder(order.id)}
+                    >
+                      <Text style={styles.approveButtonText}>Approve</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.rejectButton}
+                      onPress={() => handleRejectOrder(order.id)}
+                    >
+                      <Text style={styles.rejectButtonText}>Reject</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+                {isSale && order.status === 'confirmed' && (
+                  <View style={styles.actionButtons}>
+                    <TouchableOpacity
+                      style={styles.completeButton}
+                      onPress={() => handleCompleteOrder(order.id)}
+                    >
+                      <Text style={styles.completeButtonText}>Mark as Completed</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
               </View>
               );
             })
@@ -387,6 +455,47 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#2e7d32',
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    marginTop: 12,
+    gap: 8,
+  },
+  approveButton: {
+    flex: 1,
+    backgroundColor: '#2e7d32',
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  approveButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  rejectButton: {
+    flex: 1,
+    backgroundColor: '#c62828',
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  rejectButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  completeButton: {
+    flex: 1,
+    backgroundColor: '#1565c0',
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  completeButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
   },
   bottomNav: {
     flexDirection: 'row',
