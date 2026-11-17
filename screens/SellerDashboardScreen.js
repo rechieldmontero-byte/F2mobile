@@ -212,27 +212,6 @@ export default function SellerDashboardScreen({ navigation }) {
           />
         </View>
 
-        <View style={styles.categorySection}>
-          <Text style={styles.categoryTitle}>Products by Category</Text>
-          <View style={styles.categoryList}>
-            {['fruits', 'vegetables', 'meats', 'dairy', 'grains', 'other']
-              .filter(cat => cat.includes(searchQuery.toLowerCase()))
-              .map((category) => (
-                <TouchableOpacity
-                  key={category}
-                  style={styles.categoryItem}
-                  onPress={() => navigation.navigate('MyProducts', { category })}
-                >
-                  <View style={styles.categoryLeft}>
-                    <Text style={styles.categoryIcon}>{categoryIcons[category]}</Text>
-                    <Text style={styles.categoryName}>{category.charAt(0).toUpperCase() + category.slice(1)}</Text>
-                  </View>
-                  <Text style={styles.categoryCount}>{stats.categories[category] || 0}</Text>
-                </TouchableOpacity>
-              ))}
-          </View>
-        </View>
-
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{stats.products}</Text>
@@ -286,6 +265,27 @@ export default function SellerDashboardScreen({ navigation }) {
               </TouchableOpacity>
             </View>
           )}
+        </View>
+
+        <View style={styles.categorySection}>
+          <Text style={styles.categoryTitle}>Products by Category</Text>
+          <View style={styles.categoryList}>
+            {['fruits', 'vegetables', 'meats', 'dairy', 'grains', 'other']
+              .filter(cat => cat.includes(searchQuery.toLowerCase()))
+              .map((category) => (
+                <TouchableOpacity
+                  key={category}
+                  style={styles.categoryItem}
+                  onPress={() => navigation.navigate('MyProducts', { category })}
+                >
+                  <View style={styles.categoryLeft}>
+                    <Text style={styles.categoryIcon}>{categoryIcons[category]}</Text>
+                    <Text style={styles.categoryName}>{category.charAt(0).toUpperCase() + category.slice(1)}</Text>
+                  </View>
+                  <Text style={styles.categoryCount}>{stats.categories[category] || 0}</Text>
+                </TouchableOpacity>
+              ))}
+          </View>
         </View>
       </ScrollView>
 
