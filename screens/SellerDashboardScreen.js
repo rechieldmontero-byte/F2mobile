@@ -117,6 +117,28 @@ export default function SellerDashboardScreen({ navigation }) {
         <View style={styles.loadingContainer}>
           <Text>Loading...</Text>
         </View>
+        <View style={styles.bottomNav}>
+          <TouchableOpacity style={[styles.navItem, styles.navItemActive]} onPress={() => navigation.navigate('Home')}>
+            <Text style={[styles.navIcon, styles.navIconActive]}>🏠</Text>
+            <Text style={[styles.navLabel, styles.navLabelActive]}>Home</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('MyProducts')}>
+            <Text style={styles.navIcon}>📦</Text>
+            <Text style={styles.navLabel}>Products</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Add', { mode: 'listing' })}>
+            <Text style={styles.navIcon}>➕</Text>
+            <Text style={styles.navLabel}>Add Product</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Orders')}>
+            <Text style={styles.navIcon}>🛍️</Text>
+            <Text style={styles.navLabel}>Orders</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Profile')}>
+            <Text style={styles.navIcon}>👤</Text>
+            <Text style={styles.navLabel}>Profile</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -185,8 +207,8 @@ export default function SellerDashboardScreen({ navigation }) {
 
       <View style={styles.bottomNav}>
         <TouchableOpacity style={[styles.navItem, styles.navItemActive]} onPress={() => navigation.navigate('Home')}>
-          <Text style={[styles.navIcon, styles.navIconActive]}>📊</Text>
-          <Text style={[styles.navLabel, styles.navLabelActive]}>Dashboard</Text>
+          <Text style={[styles.navIcon, styles.navIconActive]}>🏠</Text>
+          <Text style={[styles.navLabel, styles.navLabelActive]}>Home</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('MyProducts')}>
           <Text style={styles.navIcon}>📦</Text>
