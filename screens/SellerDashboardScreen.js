@@ -209,7 +209,7 @@ export default function SellerDashboardScreen({ navigation }) {
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>₱{stats.revenue.toLocaleString()}</Text>
-            <Text style={styles.statLabel}>Revenue</Text>
+            <Text style={styles.statLabel}>Income</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{stats.orders}</Text>
@@ -219,6 +219,12 @@ export default function SellerDashboardScreen({ navigation }) {
             <Text style={styles.statValue}>{stats.pending}</Text>
             <Text style={styles.statLabel}>Pending</Text>
           </View>
+        </View>
+
+        <View style={styles.incomeCard}>
+          <Text style={styles.incomeTitle}>💰 Total Income</Text>
+          <Text style={styles.incomeAmount}>₱{stats.revenue.toLocaleString()}</Text>
+          <Text style={styles.incomeSubtitle}>From {stats.orders} orders</Text>
         </View>
 
         <View style={styles.section}>
@@ -390,6 +396,30 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
     textAlign: 'center',
+  },
+  incomeCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
+    elevation: 1,
+    alignItems: 'center',
+  },
+  incomeTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1b5e20',
+    marginBottom: 8,
+  },
+  incomeAmount: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#1b5e20',
+    marginBottom: 8,
+  },
+  incomeSubtitle: {
+    fontSize: 14,
+    color: '#666',
   },
   loadingContainer: {
     flex: 1,
