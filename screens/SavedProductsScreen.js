@@ -155,6 +155,29 @@ export default function SavedProductsScreen({ navigation }) {
           </View>
         </>
       )}
+
+      <View style={styles.bottomNav}>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.replace('Home')}>
+          <Text style={styles.navIcon}>🏠</Text>
+          <Text style={styles.navLabel}>Home</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.replace('Explore')}>
+          <Text style={styles.navIcon}>🔍</Text>
+          <Text style={styles.navLabel}>Explore</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.navItem, styles.navItemActive]}>
+          <Text style={[styles.navIcon, styles.navIconActive]}>🛒</Text>
+          <Text style={[styles.navLabel, styles.navLabelActive]}>Cart</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.replace('Orders')}>
+          <Text style={styles.navIcon}>📦</Text>
+          <Text style={styles.navLabel}>Orders</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.replace('Profile')}>
+          <Text style={styles.navIcon}>👤</Text>
+          <Text style={styles.navLabel}>Profile</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -315,6 +338,38 @@ const styles = StyleSheet.create({
     padding: 16,
     borderTopWidth: 1,
     borderTopColor: '#e0e0e0',
+  },
+  bottomNav: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+    justifyContent: 'space-between',
+  },
+  navItem: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  navItemActive: {
+    // active state
+  },
+  navIcon: {
+    fontSize: 24,
+    marginBottom: 4,
+  },
+  navIconActive: {
+    color: '#087F5B',
+  },
+  navLabel: {
+    fontSize: 11,
+    color: '#333',
+  },
+  navLabelActive: {
+    color: '#087F5B',
+    fontWeight: '600',
   },
   totalRow: {
     flexDirection: 'row',

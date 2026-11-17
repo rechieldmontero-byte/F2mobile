@@ -214,13 +214,17 @@ export default function ExploreScreen({ navigation }) {
           <Text style={styles.navIcon}>🏠</Text>
           <Text style={styles.navLabel}>Home</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.navItem, styles.navItemActive]}>
-          <Text style={[styles.navIcon, styles.navIconActive]}>⊞</Text>
+        <TouchableOpacity style={[styles.navItem, styles.navItemActive]} onPress={() => navigation.navigate('Explore')}>
+          <Text style={[styles.navIcon, styles.navIconActive]}>🔍</Text>
           <Text style={[styles.navLabel, styles.navLabelActive]}>Explore</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('SavedProducts')}>
-          <Text style={styles.navIcon}>💾</Text>
-          <Text style={styles.navLabel}>Saved</Text>
+          <Text style={styles.navIcon}>🛒</Text>
+          <Text style={styles.navLabel}>Cart</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Orders')}>
+          <Text style={styles.navIcon}>📦</Text>
+          <Text style={styles.navLabel}>Orders</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Profile')}>
           <Text style={styles.navIcon}>👤</Text>
@@ -426,13 +430,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#fff',
     paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingHorizontal: 8,
     borderTopWidth: 1,
     borderTopColor: '#e0e0e0',
+    justifyContent: 'space-between',
   },
   navItem: {
     flex: 1,
     alignItems: 'center',
+    paddingVertical: 4,
   },
   navItemActive: {
     // active state
@@ -442,14 +448,14 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   navIconActive: {
-    color: '#2e7d32',
+    color: '#087F5B',
   },
   navLabel: {
     fontSize: 11,
-    color: '#888',
+    color: '#333',
   },
   navLabelActive: {
-    color: '#2e7d32',
+    color: '#087F5B',
     fontWeight: '600',
   },
 });

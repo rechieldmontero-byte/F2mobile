@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, ActivityIndicator, RefreshControl, Modal } from 'react-native';
 import { supabase } from '../lib/supabase';
+import { showAlert } from '../utils/alert';
 
 const TABS = ['Supply', 'Group Buying', 'Fulfillment', 'Auction'];
 
@@ -9,6 +10,9 @@ export default function ActivityScreen({ navigation, route }) {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [data, setData] = useState([]);
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [filterCategory, setFilterCategory] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('all');
 
   useEffect(() => {
     if (activeTab) {
@@ -28,16 +32,32 @@ export default function ActivityScreen({ navigation, route }) {
       let query;
       switch (activeTab) {
         case 'Supply':
-          query = supabase.from('products').select('*').order('created_at', { ascending: false }).limit(10);
+          query = supabase.from('products').select('*');
+          if (filterCategory !== 'all') {
+            query = query.eq('category', filterCategory);
+          }
+          query = query.order('created_at', { ascending: false }).limit(10);
           break;
         case 'Group Buying':
-          query = supabase.from('group_buying').select('*').eq('status', 'open').order('created_at', { ascending: false });
+          query = supabase.from('group_buying').select('*');
+          if (filterStatus !== 'all') {
+            query = query.eq('status', filterStatus);
+          }
+          query = query.order('created_at', { ascending: false });
           break;
         case 'Fulfillment':
-          query = supabase.from('deliveries').select('*, orders(*)').order('created_at', { ascending: false });
+          query = supabase.from('deliveries').select('*, orders(*)');
+          if (filterStatus !== 'all') {
+            query = query.eq('status', filterStatus);
+          }
+          query = query.order('created_at', { ascending: false });
           break;
         case 'Auction':
-          query = supabase.from('auctions').select('*').eq('status', 'active').order('end_time', { ascending: true });
+          query = supabase.from('auctions').select('*');
+          if (filterStatus !== 'all') {
+            query = query.eq('status', filterStatus);
+          }
+          query = query.order('end_time', { ascending: true });
           break;
         default:
           setData([]);
@@ -174,7 +194,9 @@ export default function ActivityScreen({ navigation, route }) {
       <View style={styles.searchBar}>
         <Text style={styles.searchIcon}>🔍</Text>
         <Text style={styles.searchPlaceholder}>Search...</Text>
-        <Text style={styles.filterIcon}>⚙️</Text>
+        <TouchableOpacity onPress={() => setFilterModalVisible(true)} style={styles.filterButton}>
+          <Text style={styles.filterIcon}>⚙️</Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView
@@ -220,6 +242,71 @@ export default function ActivityScreen({ navigation, route }) {
           <Text style={styles.navLabel}>Profile</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Filter Modal */}
+      <Modal
+        visible={filterModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setFilterModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Filter {activeTab}</Text>
+              <TouchableOpacity onPress={() => setFilterModalVisible(false)}>
+                <Text style={styles.modalClose}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            {activeTab === 'Supply' && (
+              <View style={styles.filterSection}>
+                <Text style={styles.filterLabel}>Category</Text>
+                {['all', 'fruits', 'veggies', 'meats', 'dairy'].map((cat) => (
+                  <TouchableOpacity
+                    key={cat}
+                    style={[styles.filterOption, filterCategory === cat && styles.filterOptionActive]}
+                    onPress={() => { setFilterCategory(cat); fetchData(); setFilterModalVisible(false); }}
+                  >
+                    <Text style={[styles.filterOptionText, filterCategory === cat && styles.filterOptionTextActive]}>
+                      {cat === 'all' ? 'All Categories' : cat.charAt(0).toUpperCase() + cat.slice(1)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+
+            {activeTab !== 'Supply' && (
+              <View style={styles.filterSection}>
+                <Text style={styles.filterLabel}>Status</Text>
+                {['all', 'open', 'active', 'pending', 'completed', 'closed'].map((status) => (
+                  <TouchableOpacity
+                    key={status}
+                    style={[styles.filterOption, filterStatus === status && styles.filterOptionActive]}
+                    onPress={() => { setFilterStatus(status); fetchData(); setFilterModalVisible(false); }}
+                  >
+                    <Text style={[styles.filterOptionText, filterStatus === status && styles.filterOptionTextActive]}>
+                      {status === 'all' ? 'All Status' : status.charAt(0).toUpperCase() + status.slice(1)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+
+            <TouchableOpacity
+              style={styles.resetButton}
+              onPress={() => {
+                setFilterCategory('all');
+                setFilterStatus('all');
+                fetchData();
+                setFilterModalVisible(false);
+              }}
+            >
+              <Text style={styles.resetButtonText}>Reset Filters</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -310,6 +397,72 @@ const styles = StyleSheet.create({
   },
   filterIcon: {
     fontSize: 18,
+  },
+  filterButton: {
+    padding: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  modalClose: {
+    fontSize: 24,
+    color: '#999',
+  },
+  filterSection: {
+    marginBottom: 20,
+  },
+  filterLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+    marginBottom: 12,
+  },
+  filterOption: {
+    padding: 14,
+    borderRadius: 10,
+    backgroundColor: '#f5f5f5',
+    marginBottom: 8,
+  },
+  filterOptionActive: {
+    backgroundColor: '#2e7d32',
+  },
+  filterOptionText: {
+    fontSize: 14,
+    color: '#333',
+  },
+  filterOptionTextActive: {
+    color: '#fff',
+  },
+  resetButton: {
+    backgroundColor: '#f5f5f5',
+    padding: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  resetButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
   },
   content: {
     flex: 1,
