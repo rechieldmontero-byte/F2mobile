@@ -229,6 +229,57 @@ export default function SellerDashboardScreen({ navigation }) {
             <Text style={styles.statLabel}>Pending</Text>
           </View>
         </View>
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Recommended for you</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('MyProducts')}>
+              <Text style={styles.viewAll}>View All</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <TouchableOpacity
+              style={styles.productCard}
+              onPress={() => navigation.navigate('Add', { mode: 'listing' })}
+            >
+              <View style={styles.productImage}>
+                <Text style={styles.productEmoji}>➕</Text>
+              </View>
+              <Text style={styles.productName}>Add Product</Text>
+              <Text style={styles.productPrice}>Create listing</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.productCard}
+              onPress={() => navigation.navigate('Orders')}
+            >
+              <View style={styles.productImage}>
+                <Text style={styles.productEmoji}>🛍️</Text>
+              </View>
+              <Text style={styles.productName}>View Orders</Text>
+              <Text style={styles.productPrice}>{stats.orders} orders</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.productCard}
+              onPress={() => navigation.navigate('Analytics')}
+            >
+              <View style={styles.productImage}>
+                <Text style={styles.productEmoji}>📊</Text>
+              </View>
+              <Text style={styles.productName}>Analytics</Text>
+              <Text style={styles.productPrice}>Track sales</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.productCard}
+              onPress={() => navigation.navigate('MyProducts')}
+            >
+              <View style={styles.productImage}>
+                <Text style={styles.productEmoji}>📦</Text>
+              </View>
+              <Text style={styles.productName}>My Products</Text>
+              <Text style={styles.productPrice}>{stats.products} items</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
       </ScrollView>
 
       <View style={styles.bottomNav}>
@@ -396,6 +447,58 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#1b5e20',
+  },
+  section: {
+    marginBottom: 20,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  viewAll: {
+    fontSize: 14,
+    color: '#2e7d32',
+    fontWeight: '600',
+  },
+  productCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 12,
+    marginRight: 12,
+    width: 120,
+    alignItems: 'center',
+    elevation: 1,
+  },
+  productImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 10,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  productEmoji: {
+    fontSize: 32,
+  },
+  productName: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  productPrice: {
+    fontSize: 11,
+    color: '#666',
+    textAlign: 'center',
   },
   bottomNav: {
     flexDirection: 'row',
