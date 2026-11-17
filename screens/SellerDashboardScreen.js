@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput } from 'react-native';
 import { supabase } from '../lib/supabase';
-import logo from '../assets/logo.png';
 
 export default function SellerDashboardScreen({ navigation }) {
   const [stats, setStats] = useState({
@@ -43,7 +42,6 @@ export default function SellerDashboardScreen({ navigation }) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Fetch seller's own products for recommendations
       const { data: products } = await supabase
         .from('products')
         .select('id, name, price, image, category')
@@ -63,7 +61,6 @@ export default function SellerDashboardScreen({ navigation }) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Fetch user profile for name and image
       const { data: profile } = await supabase
         .from('profiles')
         .select('full_name, username, avatar_url')
@@ -75,7 +72,6 @@ export default function SellerDashboardScreen({ navigation }) {
         setProfileImage(profile.avatar_url || null);
       }
 
-      // Fetch seller's products
       const { data: products } = await supabase
         .from('products')
         .select('id, category')
@@ -99,10 +95,8 @@ export default function SellerDashboardScreen({ navigation }) {
         }
       });
 
-      // Fetch seller's product IDs
       const productIds = products?.map(p => p.id) || [];
 
-      // Fetch order items for seller's products
       let revenue = 0;
       let orders = 0;
       let pending = 0;
@@ -124,7 +118,6 @@ export default function SellerDashboardScreen({ navigation }) {
           orders = orderIds.length;
           pending = orderData?.filter(o => o.status === 'pending' || o.status === 'confirmed').length || 0;
 
-          // Calculate revenue from order items
           revenue = orderItems?.reduce((sum, item) => {
             return sum + (parseFloat(item.price) * item.quantity);
           }, 0) || 0;
@@ -194,10 +187,7 @@ export default function SellerDashboardScreen({ navigation }) {
               <Text style={styles.welcomeSubtitle}>Presko Baratu tatak ADSSU</Text>
             </View>
             <View style={styles.profileContainer}>
-              <Image
-                source={profileImage && profileImage.startsWith('http') ? { uri: profileImage } : logo}
-                style={styles.profileImage}
-              />
+              <Text style={styles.profilePlaceholder}>👤</Text>
             </View>
           </View>
         </View>
@@ -341,7 +331,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     elevation: 1,
   },
-<|open|>argument key="new_string" type="string"<|sep|>  welcomeHeader: {
+  welcomeHeader: {
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -361,12 +351,8 @@ const styles = StyleSheet.create({
   profileContainer: {
     marginLeft: 16,
   },
-  profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    borderWidth: 2,
-    borderColor: '#2e7d32',
+  profilePlaceholder: {
+    fontSize: 40,
   },
   searchContainer: {
     marginBottom: 16,
@@ -383,6 +369,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    marginBottom: 20,
   },
   statCard: {
     width: '48%',
@@ -564,3 +551,5 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+</content>
+</invoke>','file_path':'C:\AgriHub\screens\SellerDashboardScreen.js'
