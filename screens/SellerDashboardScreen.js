@@ -21,7 +21,6 @@ export default function SellerDashboardScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [userName, setUserName] = useState('');
-  const [profileImage, setProfileImage] = useState(null);
   const [recommendedProducts, setRecommendedProducts] = useState([]);
 
   const categoryIcons = {
@@ -70,7 +69,6 @@ export default function SellerDashboardScreen({ navigation }) {
 
       if (profile) {
         setUserName(profile.full_name || profile.username || 'Seller');
-        setProfileImage(profile.avatar_url || null);
       }
 
       const { data: products } = await supabase
@@ -191,12 +189,8 @@ export default function SellerDashboardScreen({ navigation }) {
               <Text style={styles.welcomeTitle}>Hello, {userName}!</Text>
               <Text style={styles.welcomeSubtitle}>Presko Baratu tatak ADSSU</Text>
             </View>
-            <View style={styles.profileContainer}>
-              <Image
-                source={profileImage && profileImage.startsWith('http') ? { uri: profileImage } : logo}
-                style={styles.profileImage}
-              />
-            </View>
+                      </View>
+        </View>
           </View>
         </View>
 
@@ -362,16 +356,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
   },
-  profileContainer: {
-    marginLeft: 16,
-  },
-  profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    borderWidth: 2,
-    borderColor: '#2e7d32',
-  },
+
   searchContainer: {
     marginBottom: 16,
   },
