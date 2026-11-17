@@ -192,7 +192,10 @@ export default function SellerDashboardScreen({ navigation }) {
               <Text style={styles.welcomeSubtitle}>Presko Baratu tatak ADSSU</Text>
             </View>
             <View style={styles.profileContainer}>
-              <Text style={styles.profilePlaceholder}>👤</Text>
+              <Image
+                source={profileImage && profileImage.startsWith('http') ? { uri: profileImage } : logo}
+                style={styles.profileImage}
+              />
             </View>
           </View>
         </View>
@@ -362,8 +365,12 @@ const styles = StyleSheet.create({
   profileContainer: {
     marginLeft: 16,
   },
-  profilePlaceholder: {
-    fontSize: 40,
+  profileImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    borderWidth: 2,
+    borderColor: '#2e7d32',
   },
   searchContainer: {
     marginBottom: 16,
