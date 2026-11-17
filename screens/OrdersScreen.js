@@ -152,6 +152,10 @@ export default function OrdersScreen({ navigation }) {
           <Text style={styles.navIcon}>🔍</Text>
           <Text style={styles.navLabel}>Explore</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.replace('SavedProducts')}>
+          <Text style={styles.navIcon}>🛒</Text>
+          <Text style={styles.navLabel}>Cart</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={[styles.navItem, styles.navItemActive]}>
           <Text style={[styles.navIcon, styles.navIconActive]}>📦</Text>
           <Text style={[styles.navLabel, styles.navLabelActive]}>Orders</Text>

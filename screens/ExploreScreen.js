@@ -218,6 +218,10 @@ export default function ExploreScreen({ navigation }) {
           <Text style={[styles.navIcon, styles.navIconActive]}>🔍</Text>
           <Text style={[styles.navLabel, styles.navLabelActive]}>Explore</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.replace('SavedProducts')}>
+          <Text style={styles.navIcon}>🛒</Text>
+          <Text style={styles.navLabel}>Cart</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} onPress={() => navigation.replace('Orders')}>
           <Text style={styles.navIcon}>📦</Text>
           <Text style={styles.navLabel}>Orders</Text>

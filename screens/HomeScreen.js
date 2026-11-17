@@ -184,6 +184,10 @@ export default function HomeScreen({ navigation }) {
           <Text style={styles.navIcon}>⊞</Text>
           <Text style={styles.navLabel}>Explore</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('SavedProducts')}>
+          <Text style={styles.navIcon}>🛒</Text>
+          <Text style={styles.navLabel}>Cart</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Orders')}>
           <Text style={styles.navIcon}>📦</Text>
           <Text style={styles.navLabel}>Orders</Text>
