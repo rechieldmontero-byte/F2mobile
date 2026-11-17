@@ -20,13 +20,43 @@ export default function OrdersScreen({ navigation }) {
         return;
       }
       setCurrentUserId(user.id);
-      const { data, error } = await supabase
+
+      // Fetch seller's products
+      const { data: products } = await supabase
+        .from('products')
+        .select('id')
+        .eq('user_id', user.id);
+
+      const productIds = products?.map(p => p.id) || [];
+
+      // Fetch all orders
+      const { data: allOrders } = await supabase
         .from('orders')
         .select('*')
-        .eq('buyer_id', user.id)
         .order('created_at', { ascending: false });
-      if (error) throw error;
-      setOrders(data || []);
+
+      // Fetch order_items
+      const { data: orderItems } = await supabase
+        .from('order_items')
+        .select('*');
+
+      // Filter orders that contain seller's products
+      const sellerOrderIds = new Set(
+        (orderItems || [])
+          .filter(item => productIds.includes(item.product_id))
+          .map(item => item.order_id)
+      );
+
+      // Combine own orders (as buyer) + sales orders (as seller)
+      const ownOrders = (allOrders || []).filter(o => o.buyer_id === user.id);
+      const salesOrders = (allOrders || []).filter(o => sellerOrderIds.has(o.id) && o.buyer_id !== user.id);
+
+      // Merge and sort by date
+      const combinedOrders = [...ownOrders, ...salesOrders].sort((a, b) =>
+        new Date(b.created_at) - new Date(a.created_at)
+      );
+
+      setOrders(combinedOrders);
     } catch (error) {
       console.error('Error fetching orders:', error);
     } finally {
@@ -94,7 +124,7 @@ export default function OrdersScreen({ navigation }) {
         <TouchableOpacity onPress={() => navigation.replace('Home')} style={styles.backButton}>
           <Text style={styles.backText}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>My Orders</Text>
+        <Text style={styles.headerTitle}>Orders</Text>
       </View>
 
       {loading ? (
@@ -114,12 +144,21 @@ export default function OrdersScreen({ navigation }) {
               <Text style={styles.emptySubtitle}>Your orders will appear here</Text>
             </View>
           ) : (
-            orders.map((order) => (
+            orders.map((order) => {
+              const isSale = order.buyer_id !== currentUserId;
+              return (
               <View key={order.id} style={styles.orderCard}>
                 <View style={styles.orderHeader}>
                   <Text style={styles.orderId}>Order #{order.id.slice(0, 8)}</Text>
-                  <View style={[styles.statusBadge, { backgroundColor: statusColor(order.status) }]}>
-                    <Text style={styles.statusText}>{order.status}</Text>
+                  <View style={styles.headerBadges}>
+                    {isSale && (
+                      <View style={styles.saleBadge}>
+                        <Text style={styles.saleBadgeText}>Sale</Text>
+                      </View>
+                    )}
+                    <View style={[styles.statusBadge, { backgroundColor: statusColor(order.status) }]}>
+                      <Text style={styles.statusText}>{order.status}</Text>
+                    </View>
                   </View>
                 </View>
                 <Text style={styles.orderItems}>{getItemsSummary(order.items) || 'Items'}</Text>
@@ -138,7 +177,8 @@ export default function OrdersScreen({ navigation }) {
                   <Text style={styles.orderTotal}>₱{parseFloat(order.total_amount || 0).toLocaleString()}</Text>
                 </View>
               </View>
-            ))
+              );
+            })
           )}
         </ScrollView>
       )}
@@ -267,11 +307,45 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textTransform: 'uppercase',
   },
+  headerBadges: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  saleBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: '#fff3e0',
+  },
+  saleBadgeText: {
+    color: '#e65100',
+    fontSize: 10,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+  },
   statusText: {
     color: '#fff',
     fontSize: 11,
     fontWeight: 'bold',
     textTransform: 'capitalize',
+  },
+  headerBadges: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  saleBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: '#fff3e0',
+  },
+  saleBadgeText: {
+    color: '#e65100',
+    fontSize: 10,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
   },
   orderItems: {
     fontSize: 13,
@@ -345,5 +419,22 @@ const styles = StyleSheet.create({
   navLabelActive: {
     color: '#087F5B',
     fontWeight: '600',
+  },
+  headerBadges: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  saleBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: '#fff3e0',
+  },
+  saleBadgeText: {
+    color: '#e65100',
+    fontSize: 10,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
   },
 });

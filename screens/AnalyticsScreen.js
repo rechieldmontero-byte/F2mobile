@@ -22,26 +22,53 @@ export default function AnalyticsScreen({ navigation }) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const [productsRes, ordersRes] = await Promise.all([
-        supabase.from('products').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
-        supabase.from('orders').select('*').order('created_at', { ascending: false }),
-      ]);
+      // Fetch seller's products
+      const { data: products } = await supabase
+        .from('products')
+        .select('id')
+        .eq('user_id', user.id);
 
-      // RLS returns own orders + orders containing seller's products
-      const allOrders = ordersRes.data || [];
-      const ownOrders = allOrders.filter((o) => o.buyer_id === user.id);
-      const salesOrders = allOrders.filter((o) => o.buyer_id !== user.id);
+      const productIds = products?.map(p => p.id) || [];
 
-      const revenue = salesOrders.reduce((sum, o) => sum + (parseFloat(o.total_amount) || 0), 0);
-      const pending = allOrders.filter(o => o.status === 'pending' || o.status === 'confirmed').length;
+      // Fetch all orders (RLS returns own orders + orders containing seller's products)
+      const { data: orders } = await supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      // Fetch order_items for seller's products
+      const { data: orderItems } = await supabase
+        .from('order_items')
+        .select('*');
+
+      const allOrders = orders || [];
+      const allOrderItems = orderItems || [];
+
+      // Filter orders that contain seller's products
+      const sellerOrderIds = new Set(
+        allOrderItems
+          .filter(item => productIds.includes(item.product_id))
+          .map(item => item.order_id)
+      );
+
+      const salesOrders = allOrders.filter(o => sellerOrderIds.has(o.id));
+      const ownOrders = allOrders.filter(o => o.buyer_id === user.id);
+
+      // Calculate total sold quantity and revenue from seller's products
+      const sellerOrderItems = allOrderItems.filter(item => productIds.includes(item.product_id));
+      const totalSold = sellerOrderItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
+      const totalRevenue = sellerOrderItems.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 0)), 0);
+
+      const pending = salesOrders.filter(o => o.status === 'pending' || o.status === 'confirmed').length;
 
       setStats({
-        products: productsRes.count || 0,
+        products: productIds.length,
         orders: salesOrders.length,
         purchases: ownOrders.length,
-        revenue,
+        revenue: totalRevenue,
+        totalSold,
         pending,
-        recentOrders: allOrders.slice(0, 5),
+        recentOrders: salesOrders.slice(0, 5),
       });
     } catch (error) {
       console.error('Error fetching analytics:', error);
@@ -135,14 +162,14 @@ export default function AnalyticsScreen({ navigation }) {
             <Text style={styles.statLabel}>Sales Orders</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statIcon}>🛒</Text>
-            <Text style={styles.statValue}>{stats.purchases || 0}</Text>
-            <Text style={styles.statLabel}>My Purchases</Text>
+            <Text style={styles.statIcon}>✅</Text>
+            <Text style={styles.statValue}>{stats.totalSold || 0}</Text>
+            <Text style={styles.statLabel}>Total Sold</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statIcon}>💰</Text>
-            <Text style={styles.statValue}>₱{stats.revenue.toLocaleString()}</Text>
-            <Text style={styles.statLabel}>Total Revenue</Text>
+            <Text style={styles.statValue}>₱{(stats.revenue || 0).toLocaleString()}</Text>
+            <Text style={styles.statLabel}>Total Income</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statIcon}>⏳</Text>
