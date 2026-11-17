@@ -551,5 +551,3 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
-</content>
-</invoke>','file_path':'C:\AgriHub\screens\SellerDashboardScreen.js'
