@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, Image } from 'react-native';
 import { supabase } from '../lib/supabase';
+import logo from '../assets/logo.png';
 
 export default function SellerDashboardScreen({ navigation }) {
   const [stats, setStats] = useState({
@@ -182,6 +183,10 @@ export default function SellerDashboardScreen({ navigation }) {
       <ScrollView style={styles.content}>
         <View style={styles.welcomeCard}>
           <View style={styles.welcomeHeader}>
+            <Image
+              source={logo}
+              style={styles.logoImage}
+            />
             <View style={styles.welcomeTextContainer}>
               <Text style={styles.welcomeTitle}>Hello, {userName}!</Text>
               <Text style={styles.welcomeSubtitle}>Presko Baratu tatak ADSSU</Text>
@@ -334,6 +339,12 @@ const styles = StyleSheet.create({
   welcomeHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  logoImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginRight: 16,
   },
   welcomeTextContainer: {
     flex: 1,
