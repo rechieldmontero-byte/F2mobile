@@ -96,7 +96,7 @@ export default function ExploreScreen({ navigation }) {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.location}>📍 New Mexico, USA</Text>
+          <Text style={styles.location}>📍 Philippines</Text>
         </View>
         <View style={styles.searchBar}>
           <Text style={styles.searchIcon}>🔍</Text>
@@ -120,7 +120,7 @@ export default function ExploreScreen({ navigation }) {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.location}>📍 New Mexico, USA</Text>
+          <Text style={styles.location}>📍 Philippines</Text>
         </View>
         <View style={styles.searchBar}>
           <Text style={styles.searchIcon}>🔍</Text>
@@ -146,7 +146,7 @@ export default function ExploreScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.location}>📍 New Mexico, USA</Text>
+        <Text style={styles.location}>📍 Philippines</Text>
         <TouchableOpacity onPress={() => navigation.navigate('SavedProducts')}>
           <Text style={styles.cartIcon}>🛒</Text>
         </TouchableOpacity>

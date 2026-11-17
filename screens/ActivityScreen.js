@@ -224,25 +224,6 @@ export default function ActivityScreen({ navigation, route }) {
         )}
       </ScrollView>
 
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Home')}>
-          <Text style={styles.navIcon}>🏠</Text>
-          <Text style={styles.navLabel}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Explore')}>
-          <Text style={styles.navIcon}>⊞</Text>
-          <Text style={styles.navLabel}>Explore</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('SavedProducts')}>
-          <Text style={styles.navIcon}>💾</Text>
-          <Text style={styles.navLabel}>Saved</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Profile')}>
-          <Text style={styles.navIcon}>👤</Text>
-          <Text style={styles.navLabel}>Profile</Text>
-        </TouchableOpacity>
-      </View>
-
       {/* Filter Modal */}
       <Modal
         visible={filterModalVisible}
@@ -577,25 +558,5 @@ const styles = StyleSheet.create({
   },
   statusPending: {
     color: '#f57c00',
-  },
-  bottomNav: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-  },
-  navItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  navIcon: {
-    fontSize: 24,
-    marginBottom: 4,
-  },
-  navLabel: {
-    fontSize: 11,
-    color: '#888',
   },
 });
