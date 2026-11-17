@@ -71,3 +71,134 @@ AgriHub kay usa ka **agricultural marketplace** nga nag-hubli sa mga farmers/sel
 - Active buyers/sellers
 - Order frequency ug average order value (AOV)
 - Customer acquisition cost (CAC) vs lifetime value (LTV)
+
+## Pricing Tiers
+
+### Seller Tiers
+
+| Tier | Monthly Fee | Features |
+|------|-------------|----------|
+| **Free** | ₱0 | - Max 10 product listings<br>- Basic analytics<br>- Standard support |
+| **Growth** | ₱299 | - Unlimited listings<br>- Featured placement (5 products/month)<br>- Detailed analytics<br>- Priority support<br>- Verified badge |
+| **Premium** | ₱499 | - All Growth features<br>- Unlimited featured placements<br>- Bulk upload tools<br>- Custom branding<br>- Dedicated account manager |
+
+### Featured Listing Rates
+
+| Placement | Duration | Price |
+|-----------|----------|-------|
+| Homepage banner | 7 days | ₱199 |
+| Category top | 7 days | ₱99 |
+| Search boost | 7 days | ₱49 |
+
+## Marketing Strategy
+
+### Online Channels
+- **Social Media:** Facebook, Instagram, TikTok — agriculture groups, food bloggers
+- **Facebook Groups:** Pag-apil sa farmer groups, organic food communities
+- **Influencer Marketing:** Partner sa mga food vloggers ug agriculture influencers
+- **SEO:** "fresh produce near me", "farmers market online", "vegetables delivery"
+
+### Offline Channels
+- **Farmer Cooperatives:** Partnership sa local farmer associations
+- **Markets:** I-distribute ang flyers sa public markets
+- **Events:** Agriculture fairs, food festivals, barangay gatherings
+
+### Referral Program
+- **Buyer:** Invite a friend → get ₱50 discount on next order
+- **Seller:** Invite a seller → get 1 month free Growth tier
+
+## Operational Plan
+
+### Phase 1: MVP (Months 1-3)
+- Launch basic marketplace (buy/sell)
+- Onboard 50+ sellers
+- 500+ active buyers
+- Focus sa Cebu/Mindanao area
+
+### Phase 2: Expansion (Months 4-6)
+- Launch commission model (5% per order)
+- Add featured listings
+- Expand to Visayas
+- 1,000+ sellers, 5,000+ buyers
+
+### Phase 3: Scale (Months 7-12)
+- Premium subscriptions
+- Delivery partnerships
+- Nationwide coverage
+- 5,000+ sellers, 25,000+ buyers
+
+## Financial Projections (Estimates)
+
+### Year 1 Revenue
+
+| Source | Scenario | Estimate |
+|--------|----------|----------|
+| Commission (5% of GMV) | GMV ₱5M | ₱250,000 |
+| Featured Listings | 50/month avg | ₱60,000 |
+| Premium Subscriptions | 200 subs @ ₱499 | ₱1,197,600 |
+| **Total** | | **₱1,507,600** |
+
+### Year 1 Costs
+
+| Cost Item | Monthly | Annual |
+|-----------|---------|--------|
+| Supabase Pro | $25/mo | ₱16,500 |
+| EAS Build (Expo) | ₱500/mo | ₱6,000 |
+| Marketing | ₱15,000/mo | ₱180,000 |
+| Support Team (2) | ₱25,000/mo | ₱600,000 |
+| Payment Gateway Fees | 2% of GMV | ₱100,000 |
+| **Total** | | **₱902,500** |
+
+### Net Profit (Year 1)
+- **Revenue:** ₱1,507,600
+- **Costs:** ₱902,500
+- **Net Profit:** ₱605,100
+
+## Risk Management
+
+### Key Risks
+1. **Low Seller Adoption** — Solution: Free tier + onboarding incentives
+2. **Payment Disputes** — Solution: Clear refund policy, dispute resolution team
+3. **Quality Control** — Solution: Seller verification, buyer reviews
+4. **Competition** — Solution: Local focus, language support, unique features
+
+### Mitigation Strategies
+- **Seller verification:** Require ID/business permit for Growth+ tiers
+- **Buyer protection:** Escrow for high-value orders (₱5,000+)
+- **Insurance:** Product insurance for perishable goods
+- **Legal:** Terms of service, seller agreements
+
+## Technology Stack Costs
+
+| Service | Tier | Cost/Month |
+|---------|------|------------|
+| Supabase (Database + Auth) | Pro | $25 (₱1,375) |
+| Expo EAS Build | Free → Build Standby | ₱0 → ₱500 |
+| GitHub Pages | Free | ₱0 |
+| PayMongo (Payment Gateway) | 3.15% per transaction | Variable |
+| Cloudflare (CDN) | Free | ₱0 |
+
+## Future Features
+
+### Phase 4 (Year 2)
+- **AI Recommendations:** Product suggestions based on purchase history
+- **Group Buying:** Bulk orders para sa discounts
+- **Auctions:** Real-time bidding para sa rare items
+- **Delivery Tracking:** Real-time GPS tracking
+
+### Phase 5 (Year 3)
+- **Supply Chain Integration:** Direct farm-to-restaurant
+- **Crop Planning:** AI-assisted planting schedules for farmers
+- **International Shipping:** Export of Filipino products
+- **White-label Solution:** Offer AgriHub as SaaS to other regions
+
+## Success Criteria
+
+| Metric | Target (Year 1) | Target (Year 3) |
+|--------|----------------|-----------------|
+| Active Sellers | 1,000 | 10,000 |
+| Active Buyers | 25,000 | 500,000 |
+| GMV | ₱5M | ₱100M |
+| Net Profit | ₱600K | ₱15M |
+| Seller Retention | 70% | 85% |
+| Buyer Retention | 50% | 75% |

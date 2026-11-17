@@ -23,7 +23,7 @@ export default function OrdersScreen({ navigation }) {
       const { data, error } = await supabase
         .from('orders')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('buyer_id', user.id)
         .order('created_at', { ascending: false });
       if (error) throw error;
       setOrders(data || []);
@@ -118,15 +118,8 @@ export default function OrdersScreen({ navigation }) {
               <View key={order.id} style={styles.orderCard}>
                 <View style={styles.orderHeader}>
                   <Text style={styles.orderId}>Order #{order.id.slice(0, 8)}</Text>
-                  <View style={styles.headerBadges}>
-                    {currentUserId && order.user_id !== currentUserId && (
-                      <View style={styles.saleBadge}>
-                        <Text style={styles.saleBadgeText}>Sale</Text>
-                      </View>
-                    )}
-                    <View style={[styles.statusBadge, { backgroundColor: statusColor(order.status) }]}>
-                      <Text style={styles.statusText}>{order.status}</Text>
-                    </View>
+                  <View style={[styles.statusBadge, { backgroundColor: statusColor(order.status) }]}>
+                    <Text style={styles.statusText}>{order.status}</Text>
                   </View>
                 </View>
                 <Text style={styles.orderItems}>{getItemsSummary(order.items) || 'Items'}</Text>

@@ -48,6 +48,7 @@ export default function CheckoutScreen({ navigation, route }) {
 
       const { data: order, error } = await supabase.from('orders').insert({
         user_id: user.id,
+        buyer_id: user.id,
         status: 'pending',
         payment_method: paymentMethod,
         payment_reference: paymentMethod === 'cod' ? null : referenceNumber.trim(),
@@ -74,11 +75,12 @@ export default function CheckoutScreen({ navigation, route }) {
         }
       }
 
+      // Auto-navigate to Dashboard after successful order
       showAlert(
         'Order Placed!',
-        `Your order of ₱${total.toLocaleString()} has been placed successfully. Payment method: ${PAYMENT_METHODS.find(m => m.id === paymentMethod)?.label}.`,
-        [{ text: 'View Orders', onPress: () => navigation.replace('Orders') }]
+        `Your order of ₱${total.toLocaleString()} has been placed successfully. Payment method: ${PAYMENT_METHODS.find(m => m.id === paymentMethod)?.label}.`
       );
+      navigation.replace('Home');
     } catch (error) {
       console.error('Order error:', error);
       showAlert('Error', error.message || 'Failed to place order');

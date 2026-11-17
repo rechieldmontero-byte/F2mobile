@@ -29,8 +29,8 @@ export default function AnalyticsScreen({ navigation }) {
 
       // RLS returns own orders + orders containing seller's products
       const allOrders = ordersRes.data || [];
-      const ownOrders = allOrders.filter((o) => o.user_id === user.id);
-      const salesOrders = allOrders.filter((o) => o.user_id !== user.id);
+      const ownOrders = allOrders.filter((o) => o.buyer_id === user.id);
+      const salesOrders = allOrders.filter((o) => o.buyer_id !== user.id);
 
       const revenue = salesOrders.reduce((sum, o) => sum + (parseFloat(o.total_amount) || 0), 0);
       const pending = allOrders.filter(o => o.status === 'pending' || o.status === 'confirmed').length;
@@ -70,6 +70,26 @@ export default function AnalyticsScreen({ navigation }) {
       case 'pending': return '#f9a825';
       case 'cancelled': return '#c62828';
       default: return '#1565c0';
+    }
+  };
+
+  const paymentMethodLabel = (method) => {
+    switch (method) {
+      case 'gcash': return 'GCash';
+      case 'maya': return 'Maya';
+      case 'bank': return 'Bank Transfer';
+      case 'cod': return 'Cash on Delivery';
+      default: return method || 'Not set';
+    }
+  };
+
+  const paymentStatusColor = (status) => {
+    switch (status) {
+      case 'paid': return '#2e7d32';
+      case 'submitted': return '#1565c0';
+      case 'failed': return '#c62828';
+      case 'refunded': return '#f9a825';
+      default: return '#888';
     }
   };
 
@@ -147,6 +167,16 @@ export default function AnalyticsScreen({ navigation }) {
                   </View>
                 </View>
                 <Text style={styles.orderDate}>{formatDate(order.created_at)}</Text>
+                <View style={styles.paymentRow}>
+                  <Text style={styles.paymentText}>
+                    💳 {paymentMethodLabel(order.payment_method)}
+                  </Text>
+                  {order.payment_status && (
+                    <View style={[styles.payBadge, { backgroundColor: paymentStatusColor(order.payment_status) }]}>
+                      <Text style={styles.payBadgeText}>{order.payment_status}</Text>
+                    </View>
+                  )}
+                </View>
                 <Text style={styles.orderTotal}>₱{parseFloat(order.total_amount || 0).toLocaleString()}</Text>
               </View>
             ))
@@ -275,6 +305,28 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#888',
     marginBottom: 6,
+  },
+  paymentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  paymentText: {
+    fontSize: 12,
+    color: '#555',
+    fontWeight: '500',
+  },
+  payBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  payBadgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: 'bold',
+    textTransform: 'capitalize',
   },
   orderTotal: {
     fontSize: 16,

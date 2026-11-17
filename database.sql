@@ -19,9 +19,51 @@ CREATE TABLE IF NOT EXISTS products (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Add user_id column if table already existed without it
-ALTER TABLE products
-  ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
+-- Drop old CHECK constraints that may conflict with new column types
+DO $$
+DECLARE r RECORD;
+BEGIN
+  FOR r IN SELECT conname FROM pg_constraint
+           WHERE conrelid = 'public.products'::regclass AND contype = 'c' LOOP
+    EXECUTE format('ALTER TABLE products DROP CONSTRAINT %I', r.conname);
+  END LOOP;
+END $$;
+
+-- Add missing columns if products table already existed with older schema
+ALTER TABLE products ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS price DECIMAL(10,2);
+ALTER TABLE products ADD COLUMN IF NOT EXISTS original_price DECIMAL(10,2);
+ALTER TABLE products ADD COLUMN IF NOT EXISTS quantity TEXT;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS category TEXT;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS image TEXT;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+ALTER TABLE products ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+
+-- Fix column types for older schema (only convert if needed, safe casts)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='products' AND column_name='quantity' AND data_type <> 'text') THEN
+    ALTER TABLE products ALTER COLUMN quantity TYPE TEXT USING quantity::text;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='products' AND column_name='price' AND data_type NOT IN ('numeric')) THEN
+    ALTER TABLE products ALTER COLUMN price TYPE DECIMAL(10,2) USING COALESCE(NULLIF(regexp_replace(price::text, '[^0-9.]', '', 'g'), '')::numeric, 0);
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='products' AND column_name='original_price' AND data_type NOT IN ('numeric')) THEN
+    ALTER TABLE products ALTER COLUMN original_price TYPE DECIMAL(10,2) USING CASE WHEN original_price IS NULL THEN NULL ELSE COALESCE(NULLIF(regexp_replace(original_price::text, '[^0-9.]', '', 'g'), '')::numeric, 0) END;
+  END IF;
+END $$;
+
+-- Old schema may have NOT NULL columns that block seed inserts
+DO $$
+DECLARE r RECORD;
+BEGIN
+  FOR r IN SELECT column_name FROM information_schema.columns
+           WHERE table_schema = 'public' AND table_name = 'products'
+             AND is_nullable = 'NO' AND column_name NOT IN ('name', 'id') LOOP
+    EXECUTE format('ALTER TABLE products ALTER COLUMN %I DROP NOT NULL', r.column_name);
+  END LOOP;
+END $$;
 
 -- Sample data for products (only if table is empty)
 DO $$
@@ -63,12 +105,20 @@ CREATE TABLE IF NOT EXISTS profiles (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Add account_type and avatar_url columns if table already existed without them
-ALTER TABLE profiles
-  ADD COLUMN IF NOT EXISTS account_type TEXT DEFAULT 'buyer';
-
-ALTER TABLE profiles
-  ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+-- Add missing columns if profiles table already existed with older schema
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS full_name TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS account_type TEXT DEFAULT 'buyer';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS address TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS city TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS farm_type TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS farm_size TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS main_crops TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS years_active INTEGER;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
 
 -- Trigger to auto-create profile on user signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -99,6 +149,7 @@ CREATE TRIGGER on_auth_user_created
 CREATE TABLE IF NOT EXISTS orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  buyer_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   status TEXT DEFAULT 'pending',
   payment_method TEXT,
   payment_reference TEXT,
@@ -109,10 +160,114 @@ CREATE TABLE IF NOT EXISTS orders (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Add payment columns if orders table already existed
+-- Drop ALL constraints on orders (foreign keys, checks, NOT NULL) to fix blocking issues
+DO $$
+DECLARE r RECORD;
+BEGIN
+  FOR r IN SELECT conname, contype FROM pg_constraint
+           WHERE conrelid = 'public.orders'::regclass LOOP
+    IF r.contype = 'f' THEN
+      EXECUTE format('ALTER TABLE orders DROP CONSTRAINT %I', r.conname);
+    ELSIF r.contype = 'c' THEN
+      EXECUTE format('ALTER TABLE orders DROP CONSTRAINT %I', r.conname);
+    END IF;
+  END LOOP;
+END $$;
+
+-- Convert payment_status from ENUM to TEXT if it exists
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_attribute a
+    JOIN pg_type t ON t.oid = a.atttypid
+    WHERE a.attrelid = 'public.orders'::regclass
+      AND a.attname = 'payment_status'
+      AND t.typtype = 'e'
+  ) THEN
+    ALTER TABLE orders ALTER COLUMN payment_status TYPE TEXT USING payment_status::text;
+  END IF;
+END $$;
+
+-- Convert payment_method from ENUM to TEXT if it exists
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_attribute a
+    JOIN pg_type t ON t.oid = a.atttypid
+    WHERE a.attrelid = 'public.orders'::regclass
+      AND a.attname = 'payment_method'
+      AND t.typtype = 'e'
+  ) THEN
+    ALTER TABLE orders ALTER COLUMN payment_method TYPE TEXT USING payment_method::text;
+  END IF;
+END $$;
+
+-- Drop old NOT NULL constraints on orders that may block inserts
+
+-- Add missing columns if orders table already existed with older schema
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS buyer_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending';
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method TEXT;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_reference TEXT;
-ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_status TEXT DEFAULT 'pending';
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_status TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS total_amount DECIMAL(10,2);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS items JSONB;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+
+-- Fix column types for older schema (safe conversion - invalid JSON becomes [])
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'orders' AND column_name = 'items'
+      AND data_type <> 'jsonb'
+  ) THEN
+    ALTER TABLE orders ALTER COLUMN items TYPE JSONB
+      USING CASE
+        WHEN items IS NULL THEN '[]'::jsonb
+        WHEN items::text ~ '^\s*[\[\{]' THEN items::text::jsonb
+        ELSE '[]'::jsonb
+      END;
+  END IF;
+END $$;
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='orders' AND column_name='total_amount' AND data_type NOT IN ('numeric')) THEN
+    ALTER TABLE orders ALTER COLUMN total_amount TYPE DECIMAL(10,2)
+      USING COALESCE(NULLIF(regexp_replace(total_amount::text, '[^0-9.]', '', 'g'), '')::numeric, 0);
+  END IF;
+END $$;
+
+-- Convert payment_status from ENUM to TEXT if it exists (fixes "invalid input value for enum" error)
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_attribute a
+    JOIN pg_type t ON t.oid = a.atttypid
+    WHERE a.attrelid = 'public.orders'::regclass
+      AND a.attname = 'payment_status'
+      AND t.typtype = 'e'
+  ) THEN
+    ALTER TABLE orders ALTER COLUMN payment_status TYPE TEXT USING payment_status::text;
+  END IF;
+END $$;
+
+-- Drop old NOT NULL constraints on orders that may block inserts
+DO $$
+DECLARE r RECORD;
+BEGIN
+  FOR r IN SELECT column_name FROM information_schema.columns
+           WHERE table_schema = 'public' AND table_name = 'orders'
+             AND is_nullable = 'NO' AND column_name NOT IN ('id') LOOP
+    EXECUTE format('ALTER TABLE orders ALTER COLUMN %I DROP NOT NULL', r.column_name);
+  END LOOP;
+END $$;
+
+-- Re-add foreign key constraints for orders (after cleanup)
+ALTER TABLE orders ADD CONSTRAINT orders_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE orders ADD CONSTRAINT orders_buyer_id_fkey FOREIGN KEY (buyer_id) REFERENCES auth.users(id) ON DELETE CASCADE;
 
 -- ============================================
 -- 4. ORDER_ITEMS TABLE (optional - normalized)
@@ -155,9 +310,45 @@ CREATE TABLE IF NOT EXISTS requests (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Add missing columns if order_items table already existed with older schema
+ALTER TABLE order_items ADD COLUMN IF NOT EXISTS order_id UUID REFERENCES orders(id) ON DELETE CASCADE;
+ALTER TABLE order_items ADD COLUMN IF NOT EXISTS product_id UUID REFERENCES products(id) ON DELETE CASCADE;
+ALTER TABLE order_items ADD COLUMN IF NOT EXISTS quantity INTEGER;
+ALTER TABLE order_items ADD COLUMN IF NOT EXISTS price DECIMAL(10,2);
+ALTER TABLE order_items ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+
+-- Add missing columns if saved_products table already existed with older schema
+ALTER TABLE saved_products ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE saved_products ADD COLUMN IF NOT EXISTS product_id UUID REFERENCES products(id) ON DELETE CASCADE;
+ALTER TABLE saved_products ADD COLUMN IF NOT EXISTS quantity INTEGER DEFAULT 1;
+ALTER TABLE saved_products ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+ALTER TABLE saved_products ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+
+-- Add missing columns if requests table already existed with older schema
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS title TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS category TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS quantity TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS budget DECIMAL(10,2);
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'open';
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+
 -- ============================================
 -- ROW LEVEL SECURITY (RLS)
 -- ============================================
+
+-- Drop ALL existing policies on all tables (removes old conflicting/recursive ones)
+DO $$
+DECLARE r RECORD;
+BEGIN
+  FOR r IN SELECT schemaname, tablename, policyname FROM pg_policies
+           WHERE schemaname = 'public'
+             AND tablename IN ('products','profiles','orders','order_items','saved_products','requests') LOOP
+    EXECUTE format('DROP POLICY %I ON %I.%I', r.policyname, r.schemaname, r.tablename);
+  END LOOP;
+END $$;
 
 -- Enable RLS on all tables
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
@@ -202,27 +393,49 @@ CREATE POLICY "Users can update own profile"
   USING (auth.uid() = id);
 
 -- Orders policies
-DROP POLICY IF EXISTS "Users can read own orders" ON orders;
-DROP POLICY IF EXISTS "Users can create own orders" ON orders;
+-- Drop ALL existing policies on orders to remove old conflicting/recursive ones
+DO $$
+DECLARE r RECORD;
+BEGIN
+  FOR r IN SELECT policyname FROM pg_policies
+           WHERE schemaname = 'public' AND tablename = 'orders' LOOP
+    EXECUTE format('DROP POLICY %I ON orders', r.policyname);
+  END LOOP;
+END $$;
+
+-- Helper function (SECURITY DEFINER bypasses RLS, prevents infinite recursion)
+CREATE OR REPLACE FUNCTION public.order_has_seller_product(p_order_id UUID)
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM order_items oi
+    JOIN products p ON p.id = oi.product_id
+    WHERE oi.order_id = p_order_id AND p.user_id = auth.uid()
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
 
 CREATE POLICY "Users can read own orders"
   ON orders FOR SELECT
   USING (
-    auth.uid() = user_id OR
-    EXISTS (
-      SELECT 1 FROM order_items oi
-      JOIN products p ON p.id = oi.product_id
-      WHERE oi.order_id = orders.id AND p.user_id = auth.uid()
-    )
+    auth.uid() = buyer_id OR
+    public.order_has_seller_product(id)
   );
 
 CREATE POLICY "Users can create own orders"
   ON orders FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK (auth.uid() = buyer_id);
 
 -- Order Items policies (normalized order lines)
-DROP POLICY IF EXISTS "Users can read own order items" ON order_items;
-DROP POLICY IF EXISTS "Users can insert own order items" ON order_items;
+-- Drop ALL existing policies on order_items to remove old conflicting/recursive ones
+DO $$
+DECLARE r RECORD;
+BEGIN
+  FOR r IN SELECT policyname FROM pg_policies
+           WHERE schemaname = 'public' AND tablename = 'order_items' LOOP
+    EXECUTE format('DROP POLICY %I ON order_items', r.policyname);
+  END LOOP;
+END $$;
 
 CREATE POLICY "Users can read own order items"
   ON order_items FOR SELECT
@@ -285,6 +498,7 @@ CREATE POLICY "Users can delete own requests"
 -- INDEXES (for performance)
 -- ============================================
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
+CREATE INDEX IF NOT EXISTS idx_orders_buyer_id ON orders(buyer_id);
 CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
 CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id);
 CREATE INDEX IF NOT EXISTS idx_saved_products_user_id ON saved_products(user_id);
