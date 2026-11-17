@@ -189,8 +189,6 @@ export default function SellerDashboardScreen({ navigation }) {
               <Text style={styles.welcomeTitle}>Hello, {userName}!</Text>
               <Text style={styles.welcomeSubtitle}>Presko Baratu tatak ADSSU</Text>
             </View>
-                      </View>
-        </View>
           </View>
         </View>
 
@@ -356,7 +354,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
   },
-
   searchContainer: {
     marginBottom: 16,
   },
