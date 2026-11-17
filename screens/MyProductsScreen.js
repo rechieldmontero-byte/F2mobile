@@ -4,7 +4,15 @@ import { useFocusEffect } from '@react-navigation/native';
 import { supabase } from '../lib/supabase';
 import { showAlert } from '../utils/alert';
 
-const CATEGORIES = ['All', 'Fruits', 'Vegetables', 'Meats', 'Dairy', 'Grains', 'Other'];
+const CATEGORIES = [
+  { name: 'All', icon: '📦' },
+  { name: 'Fruits', icon: '🍎' },
+  { name: 'Vegetables', icon: '🥬' },
+  { name: 'Meats', icon: '🍗' },
+  { name: 'Dairy', icon: '🥛' },
+  { name: 'Grains', icon: '🌾' },
+  { name: 'Other', icon: '📦' },
+];
 const STATUS_OPTIONS = ['available', 'out_of_stock', 'inactive'];
 
 export default function MyProductsScreen({ navigation }) {
@@ -173,12 +181,13 @@ export default function MyProductsScreen({ navigation }) {
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll}>
         {CATEGORIES.map((category) => (
           <TouchableOpacity
-            key={category}
-            style={[styles.categoryChip, selectedCategory === category && styles.categoryChipActive]}
-            onPress={() => setSelectedCategory(category)}
+            key={category.name}
+            style={[styles.categoryChip, selectedCategory === category.name && styles.categoryChipActive]}
+            onPress={() => setSelectedCategory(category.name)}
           >
-            <Text style={[styles.categoryChipText, selectedCategory === category && styles.categoryChipTextActive]}>
-              {category}
+            <Text style={styles.categoryChipIcon}>{category.icon}</Text>
+            <Text style={[styles.categoryChipText, selectedCategory === category.name && styles.categoryChipTextActive]}>
+              {category.name}
             </Text>
           </TouchableOpacity>
         ))}
@@ -344,7 +353,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   categoryChip: {
-    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
     backgroundColor: '#f5f5f5',
@@ -360,6 +371,10 @@ const styles = StyleSheet.create({
   },
   categoryChipTextActive: {
     color: '#fff',
+  },
+  categoryChipIcon: {
+    fontSize: 14,
+    marginRight: 4,
   },
   statusScroll: {
     paddingHorizontal: 16,

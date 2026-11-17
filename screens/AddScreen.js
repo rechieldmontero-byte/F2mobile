@@ -3,11 +3,18 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Keyboa
 import { supabase } from '../lib/supabase';
 import { showAlert } from '../utils/alert';
 
-const CATEGORIES = ['Meats', 'Veggies', 'Fruits', 'Dairy', 'Grains', 'Other'];
+const CATEGORIES = [
+  { name: 'Meats', icon: '🍗' },
+  { name: 'Veggies', icon: '🥬' },
+  { name: 'Fruits', icon: '🍎' },
+  { name: 'Dairy', icon: '🥛' },
+  { name: 'Grains', icon: '🌾' },
+  { name: 'Other', icon: '📦' },
+];
 const CATEGORY_EMOJI = {
   Meats: '🍗',
   Veggies: '🥬',
-  Fruits: '🥭',
+  Fruits: '🍎',
   Dairy: '🥛',
   Grains: '🌾',
   Other: '📦',
@@ -135,12 +142,12 @@ export default function AddScreen({ navigation, route }) {
           <View style={styles.categoryRow}>
             {CATEGORIES.map((cat) => (
               <TouchableOpacity
-                key={cat}
-                style={[styles.categoryChip, form.category === cat && styles.categoryChipActive]}
-                onPress={() => setField('category', cat)}
+                key={cat.name}
+                style={[styles.categoryChip, form.category === cat.name && styles.categoryChipActive]}
+                onPress={() => setField('category', cat.name)}
               >
-                <Text style={[styles.categoryChipText, form.category === cat && styles.categoryChipTextActive]}>
-                  {CATEGORY_EMOJI[cat]} {cat}
+                <Text style={[styles.categoryChipText, form.category === cat.name && styles.categoryChipTextActive]}>
+                  {cat.icon} {cat.name}
                 </Text>
               </TouchableOpacity>
             ))}
