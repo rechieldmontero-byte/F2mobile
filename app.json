@@ -6,9 +6,11 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "backgroundColor": "#ffffff",
+    "icon": "./assets/logo.png",
     "android": {
       "package": "com.agrihub.app",
       "adaptiveIcon": {
+        "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#e8f5e9"
       },
       "permissions": [
