@@ -152,10 +152,6 @@ export default function OrdersScreen({ navigation }) {
           <Text style={styles.navIcon}>🔍</Text>
           <Text style={styles.navLabel}>Explore</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.replace('SavedProducts')}>
-          <Text style={styles.navIcon}>🛒</Text>
-          <Text style={styles.navLabel}>Cart</Text>
-        </TouchableOpacity>
         <TouchableOpacity style={[styles.navItem, styles.navItemActive]}>
           <Text style={[styles.navIcon, styles.navIconActive]}>📦</Text>
           <Text style={[styles.navLabel, styles.navLabelActive]}>Orders</Text>
@@ -165,6 +161,14 @@ export default function OrdersScreen({ navigation }) {
           <Text style={styles.navLabel}>Profile</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Floating Add Button */}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => navigation.navigate('Add')}
+      >
+        <Text style={styles.fabText}>➕</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -345,5 +349,25 @@ const styles = StyleSheet.create({
   navLabelActive: {
     color: '#087F5B',
     fontWeight: '600',
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 80,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#2e7d32',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  fabText: {
+    fontSize: 28,
+    color: '#fff',
   },
 });
