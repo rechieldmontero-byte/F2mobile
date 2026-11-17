@@ -8,7 +8,14 @@ export default function SellerDashboardScreen({ navigation }) {
     revenue: 0,
     orders: 0,
     pending: 0,
-    categories: {},
+    categories: {
+      fruits: 0,
+      vegetables: 0,
+      meats: 0,
+      dairy: 0,
+      grains: 0,
+      other: 0,
+    },
   });
   const [loading, setLoading] = useState(true);
 
@@ -28,9 +35,21 @@ export default function SellerDashboardScreen({ navigation }) {
         .eq('user_id', user.id);
 
       const productCount = products?.length || 0;
-      const categories = {};
+      const categories = {
+        fruits: 0,
+        vegetables: 0,
+        meats: 0,
+        dairy: 0,
+        grains: 0,
+        other: 0,
+      };
       products?.forEach(p => {
-        categories[p.category] = (categories[p.category] || 0) + 1;
+        const cat = (p.category || 'other').toLowerCase();
+        if (categories.hasOwnProperty(cat)) {
+          categories[cat]++;
+        } else {
+          categories.other++;
+        }
       });
 
       // Fetch seller's product IDs
@@ -122,19 +141,17 @@ export default function SellerDashboardScreen({ navigation }) {
           </View>
         </View>
 
-        {Object.keys(stats.categories).length > 0 && (
-          <View style={styles.categorySection}>
-            <Text style={styles.categoryTitle}>Products by Category</Text>
-            <View style={styles.categoryList}>
-              {Object.entries(stats.categories).map(([category, count]) => (
-                <View key={category} style={styles.categoryItem}>
-                  <Text style={styles.categoryName}>{category}</Text>
-                  <Text style={styles.categoryCount}>{count}</Text>
-                </View>
-              ))}
-            </View>
+        <View style={styles.categorySection}>
+          <Text style={styles.categoryTitle}>Products by Category</Text>
+          <View style={styles.categoryList}>
+            {['fruits', 'vegetables', 'meats', 'dairy', 'grains', 'other'].map((category) => (
+              <View key={category} style={styles.categoryItem}>
+                <Text style={styles.categoryName}>{category.charAt(0).toUpperCase() + category.slice(1)}</Text>
+                <Text style={styles.categoryCount}>{stats.categories[category] || 0}</Text>
+              </View>
+            ))}
           </View>
-        )}
+        </View>
       </ScrollView>
 
       <View style={styles.bottomNav}>
