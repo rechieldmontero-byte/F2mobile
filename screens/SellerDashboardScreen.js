@@ -20,7 +20,7 @@ export default function SellerDashboardScreen({ navigation }) {
   });
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [userName, setUserName] = useState('');
+  const [userName, setUserName] = useState('Seller');
   const [recommendedProducts, setRecommendedProducts] = useState([]);
 
   const categoryIcons = {
