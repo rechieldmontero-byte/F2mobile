@@ -22,6 +22,7 @@ export default function SellerDashboardScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [userName, setUserName] = useState('');
   const [profileImage, setProfileImage] = useState(null);
+  const [recommendedProducts, setRecommendedProducts] = useState([]);
 
   const categoryIcons = {
     fruits: '🍎',
@@ -34,7 +35,28 @@ export default function SellerDashboardScreen({ navigation }) {
 
   useEffect(() => {
     fetchStats();
+    fetchRecommendedProducts();
   }, []);
+
+  const fetchRecommendedProducts = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Fetch seller's own products for recommendations
+      const { data: products } = await supabase
+        .from('products')
+        .select('id, name, price, image, category')
+        .eq('user_id', user.id)
+        .limit(10);
+
+      if (products) {
+        setRecommendedProducts(products);
+      }
+    } catch (error) {
+      console.error('Error fetching recommended products:', error);
+    }
+  };
 
   const fetchStats = async () => {
     try {
@@ -237,48 +259,33 @@ export default function SellerDashboardScreen({ navigation }) {
               <Text style={styles.viewAll}>View All</Text>
             </TouchableOpacity>
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <TouchableOpacity
-              style={styles.productCard}
-              onPress={() => navigation.navigate('Add', { mode: 'listing' })}
-            >
-              <View style={styles.productImage}>
-                <Text style={styles.productEmoji}>➕</Text>
-              </View>
-              <Text style={styles.productName}>Add Product</Text>
-              <Text style={styles.productPrice}>Create listing</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.productCard}
-              onPress={() => navigation.navigate('Orders')}
-            >
-              <View style={styles.productImage}>
-                <Text style={styles.productEmoji}>🛍️</Text>
-              </View>
-              <Text style={styles.productName}>View Orders</Text>
-              <Text style={styles.productPrice}>{stats.orders} orders</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.productCard}
-              onPress={() => navigation.navigate('Analytics')}
-            >
-              <View style={styles.productImage}>
-                <Text style={styles.productEmoji}>📊</Text>
-              </View>
-              <Text style={styles.productName}>Analytics</Text>
-              <Text style={styles.productPrice}>Track sales</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.productCard}
-              onPress={() => navigation.navigate('MyProducts')}
-            >
-              <View style={styles.productImage}>
-                <Text style={styles.productEmoji}>📦</Text>
-              </View>
-              <Text style={styles.productName}>My Products</Text>
-              <Text style={styles.productPrice}>{stats.products} items</Text>
-            </TouchableOpacity>
-          </ScrollView>
+          {recommendedProducts.length > 0 ? (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {recommendedProducts.map((product) => (
+                <TouchableOpacity
+                  key={product.id}
+                  style={styles.productCard}
+                  onPress={() => navigation.navigate('ProductDetail', { product })}
+                >
+                  <View style={styles.productImage}>
+                    <Text style={styles.productEmoji}>{product.image || '📦'}</Text>
+                  </View>
+                  <Text style={styles.productName} numberOfLines={1}>{product.name}</Text>
+                  <Text style={styles.productPrice}>₱{parseFloat(product.price || 0).toLocaleString()}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          ) : (
+            <View style={styles.emptyProducts}>
+              <Text style={styles.emptyProductsText}>No products yet. Add your first product!</Text>
+              <TouchableOpacity
+                style={styles.addFirstProductButton}
+                onPress={() => navigation.navigate('Add', { mode: 'listing' })}
+              >
+                <Text style={styles.addFirstProductText}>Add Product</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </ScrollView>
 
@@ -499,6 +506,30 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#666',
     textAlign: 'center',
+  },
+  emptyProducts: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+    elevation: 1,
+  },
+  emptyProductsText: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  addFirstProductButton: {
+    backgroundColor: '#2e7d32',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  addFirstProductText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
   },
   bottomNav: {
     flexDirection: 'row',
