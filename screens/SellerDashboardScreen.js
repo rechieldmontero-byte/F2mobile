@@ -14,60 +14,23 @@ export default function SellerDashboardScreen({ navigation }) {
           <Text style={styles.welcomeSubtitle}>Manage your farm and sales</Text>
         </View>
 
-        <View style={styles.dashboardGrid}>
-          <TouchableOpacity
-            style={styles.dashboardCard}
-            onPress={() => navigation.navigate('Analytics')}
-          >
-            <Text style={styles.dashboardIcon}>📊</Text>
-            <Text style={styles.dashboardTitle}>Sales and Earnings</Text>
-            <Text style={styles.dashboardSubtitle}>View revenue & orders</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.dashboardCard}
-            onPress={() => navigation.navigate('Orders')}
-          >
-            <Text style={styles.dashboardIcon}>🛍️</Text>
-            <Text style={styles.dashboardTitle}>Order Management</Text>
-            <Text style={styles.dashboardSubtitle}>Track incoming orders</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.dashboardCard}
-            onPress={() => navigation.navigate('MyProducts')}
-          >
-            <Text style={styles.dashboardIcon}>📦</Text>
-            <Text style={styles.dashboardTitle}>My Products</Text>
-            <Text style={styles.dashboardSubtitle}>Manage listings</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.dashboardCard}
-            onPress={() => navigation.navigate('Add', { mode: 'listing' })}
-          >
-            <Text style={styles.dashboardIcon}>➕</Text>
-            <Text style={styles.dashboardTitle}>Add Product</Text>
-            <Text style={styles.dashboardSubtitle}>Create new listing</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.dashboardCard}
-            onPress={() => navigation.navigate('Notifications')}
-          >
-            <Text style={styles.dashboardIcon}>💬</Text>
-            <Text style={styles.dashboardTitle}>Messages</Text>
-            <Text style={styles.dashboardSubtitle}>Buyer inquiries</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.dashboardCard}
-            onPress={() => navigation.navigate('Profile')}
-          >
-            <Text style={styles.dashboardIcon}>👤</Text>
-            <Text style={styles.dashboardTitle}>Seller Profile</Text>
-            <Text style={styles.dashboardSubtitle}>Account settings</Text>
-          </TouchableOpacity>
+        <View style={styles.statsGrid}>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>0</Text>
+            <Text style={styles.statLabel}>Products</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>₱0</Text>
+            <Text style={styles.statLabel}>Revenue</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>0</Text>
+            <Text style={styles.statLabel}>Orders</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>0</Text>
+            <Text style={styles.statLabel}>Pending</Text>
+          </View>
         </View>
       </ScrollView>
 
@@ -133,34 +96,29 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
   },
-  dashboardGrid: {
+  statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-  dashboardCard: {
+  statCard: {
     width: '48%',
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 20,
+    padding: 16,
     marginBottom: 16,
     alignItems: 'center',
     elevation: 1,
   },
-  dashboardIcon: {
-    fontSize: 32,
-    marginBottom: 12,
-  },
-  dashboardTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    textAlign: 'center',
+  statValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1b5e20',
     marginBottom: 4,
   },
-  dashboardSubtitle: {
-    fontSize: 11,
-    color: '#999',
+  statLabel: {
+    fontSize: 12,
+    color: '#666',
     textAlign: 'center',
   },
   bottomNav: {
