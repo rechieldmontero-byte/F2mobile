@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, Image } from 'react-native';
 import { supabase } from '../lib/supabase';
+import logo from '../assets/logo.png';
 
 export default function SellerDashboardScreen({ navigation }) {
   const [stats, setStats] = useState({
@@ -163,8 +164,13 @@ export default function SellerDashboardScreen({ navigation }) {
 
       <ScrollView style={styles.content}>
         <View style={styles.welcomeCard}>
-          <Text style={styles.welcomeTitle}>Hello, {userName}!</Text>
-          <Text style={styles.welcomeSubtitle}>Welcome back to your seller dashboard</Text>
+          <View style={styles.welcomeHeader}>
+            <Image source={logo} style={styles.welcomeLogo} />
+            <View style={styles.welcomeTextContainer}>
+              <Text style={styles.welcomeTitle}>Hello, {userName}!</Text>
+              <Text style={styles.welcomeSubtitle}>Presko Baratu tatak ADSSU ING</Text>
+            </View>
+          </View>
         </View>
 
         <View style={styles.searchContainer}>
@@ -269,6 +275,19 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 20,
     elevation: 1,
+  },
+  welcomeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  welcomeLogo: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginRight: 16,
+  },
+  welcomeTextContainer: {
+    flex: 1,
   },
   welcomeTitle: {
     fontSize: 20,
