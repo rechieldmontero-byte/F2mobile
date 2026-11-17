@@ -71,7 +71,11 @@ export default function CheckoutScreen({ navigation, route }) {
             price: i.price,
           }));
         if (orderItemRows.length > 0) {
-          await supabase.from('order_items').insert(orderItemRows);
+          const { error: itemsError } = await supabase.from('order_items').insert(orderItemRows);
+          if (itemsError) {
+            console.error('Error inserting order_items:', itemsError);
+            // Don't throw - order is already created, just log the error
+          }
         }
       }
 

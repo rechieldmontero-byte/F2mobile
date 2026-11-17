@@ -10,83 +10,98 @@ export default function SellerDashboardScreen({ navigation }) {
 
       <ScrollView style={styles.content}>
         <View style={styles.welcomeCard}>
-          <Text style={styles.welcomeTitle}>Welcome, Seller!</Text>
-          <Text style={styles.welcomeSubtitle}>Manage your farm and products</Text>
+          <Text style={styles.welcomeTitle}>Seller Dashboard</Text>
+          <Text style={styles.welcomeSubtitle}>Manage your farm and sales</Text>
         </View>
 
-        <View style={styles.menuGrid}>
+        <View style={styles.menuList}>
           <TouchableOpacity
-            style={styles.menuItem}
-            onPress={() => navigation.navigate('Add', { mode: 'listing' })}
+            style={styles.menuRow}
+            onPress={() => navigation.navigate('Home')}
           >
-            <View style={styles.menuIcon}>
-              <Text style={styles.iconEmoji}>➕</Text>
-            </View>
-            <Text style={styles.menuLabel}>Add Product</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.menuItem}
-            onPress={() => navigation.navigate('MyProducts')}
-          >
-            <View style={styles.menuIcon}>
-              <Text style={styles.iconEmoji}>🛒</Text>
-            </View>
-            <Text style={styles.menuLabel}>Marketplace</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.menuItem}
-            onPress={() => navigation.navigate('Orders')}
-          >
-            <View style={styles.menuIcon}>
-              <Text style={styles.iconEmoji}>🛍️</Text>
-            </View>
-            <Text style={styles.menuLabel}>Orders</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.menuItem}
-            onPress={() => navigation.navigate('Analytics')}
-          >
-            <View style={styles.menuIcon}>
+            <View style={styles.menuIconSmall}>
               <Text style={styles.iconEmoji}>📊</Text>
             </View>
-            <Text style={styles.menuLabel}>Analytics</Text>
+            <Text style={styles.menuRowLabel}>Dashboard Overview</Text>
+            <Text style={styles.menuArrow}>→</Text>
           </TouchableOpacity>
-        </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
           <TouchableOpacity
-            style={styles.quickAction}
+            style={styles.menuRow}
+            onPress={() => navigation.navigate('MyProducts')}
+          >
+            <View style={styles.menuIconSmall}>
+              <Text style={styles.iconEmoji}>📦</Text>
+            </View>
+            <Text style={styles.menuRowLabel}>My Products</Text>
+            <Text style={styles.menuArrow}>→</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuRow}
             onPress={() => navigation.navigate('Add', { mode: 'listing' })}
           >
-            <Text style={styles.quickActionText}>➕ Add New Product</Text>
+            <View style={styles.menuIconSmall}>
+              <Text style={styles.iconEmoji}>➕</Text>
+            </View>
+            <Text style={styles.menuRowLabel}>Add Product</Text>
+            <Text style={styles.menuArrow}>→</Text>
           </TouchableOpacity>
+
           <TouchableOpacity
-            style={styles.quickAction}
-            onPress={() => navigation.navigate('Add', { mode: 'request' })}
+            style={styles.menuRow}
+            onPress={() => navigation.navigate('Orders')}
           >
-            <Text style={styles.quickActionText}>📝 Create Request</Text>
+            <View style={styles.menuIconSmall}>
+              <Text style={styles.iconEmoji}>🛍️</Text>
+            </View>
+            <Text style={styles.menuRowLabel}>Order Management</Text>
+            <Text style={styles.menuArrow}>→</Text>
           </TouchableOpacity>
+
           <TouchableOpacity
-            style={styles.quickAction}
-            onPress={() => navigation.navigate('Activity')}
+            style={styles.menuRow}
+            onPress={() => navigation.navigate('Analytics')}
           >
-            <Text style={styles.quickActionText}>📦 View Activity</Text>
+            <View style={styles.menuIconSmall}>
+              <Text style={styles.iconEmoji}>💰</Text>
+            </View>
+            <Text style={styles.menuRowLabel}>Sales and Earnings</Text>
+            <Text style={styles.menuArrow}>→</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuRow}
+            onPress={() => navigation.navigate('Notifications')}
+          >
+            <View style={styles.menuIconSmall}>
+              <Text style={styles.iconEmoji}>💬</Text>
+            </View>
+            <Text style={styles.menuRowLabel}>Messages</Text>
+            <Text style={styles.menuArrow}>→</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuRow}
+            onPress={() => navigation.navigate('Profile')}
+          >
+            <View style={styles.menuIconSmall}>
+              <Text style={styles.iconEmoji}>👤</Text>
+            </View>
+            <Text style={styles.menuRowLabel}>Seller Profile</Text>
+            <Text style={styles.menuArrow}>→</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
 
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={[styles.navItem, styles.navItemActive]}>
-          <Text style={[styles.navIcon, styles.navIconActive]}>⊞</Text>
-          <Text style={[styles.navLabel, styles.navLabelActive]}>Menu</Text>
+        <TouchableOpacity style={[styles.navItem, styles.navItemActive]} onPress={() => navigation.navigate('Home')}>
+          <Text style={[styles.navIcon, styles.navIconActive]}>📊</Text>
+          <Text style={[styles.navLabel, styles.navLabelActive]}>Dashboard</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('MyProducts')}>
-          <Text style={styles.navIcon}>🛒</Text>
-          <Text style={styles.navLabel}>Marketplace</Text>
+          <Text style={styles.navIcon}>📦</Text>
+          <Text style={styles.navLabel}>Products</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Add', { mode: 'listing' })}>
           <Text style={styles.navIcon}>➕</Text>
@@ -141,59 +156,42 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
   },
-  menuGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  menuItem: {
-    width: '48%',
+  menuList: {
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 20,
-    marginBottom: 16,
-    alignItems: 'center',
+    marginBottom: 20,
     elevation: 1,
+    overflow: 'hidden',
   },
-  menuIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+  menuRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  menuIconSmall: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: '#e8f5e9',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginRight: 14,
   },
   iconEmoji: {
-    fontSize: 28,
+    fontSize: 20,
   },
-  menuLabel: {
-    fontSize: 14,
+  menuRowLabel: {
+    flex: 1,
+    fontSize: 15,
     fontWeight: '600',
     color: '#333',
-    textAlign: 'center',
   },
-  section: {
-    marginBottom: 20,
-  },
-  sectionTitle: {
+  menuArrow: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 12,
-  },
-  quickAction: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 10,
-    elevation: 1,
-  },
-  quickActionText: {
-    fontSize: 14,
-    color: '#2e7d32',
-    fontWeight: '600',
+    color: '#999',
   },
   bottomNav: {
     flexDirection: 'row',
