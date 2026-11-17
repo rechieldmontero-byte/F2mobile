@@ -6,12 +6,13 @@ import { showAlert } from '../utils/alert';
 
 const STATUS_OPTIONS = ['available', 'out_of_stock', 'inactive'];
 
-export default function MyProductsScreen({ navigation }) {
+export default function MyProductsScreen({ navigation, route }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState(route?.params?.category || 'All');
   const [editingProduct, setEditingProduct] = useState(null);
 
   useEffect(() => {
@@ -111,7 +112,8 @@ export default function MyProductsScreen({ navigation }) {
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = selectedStatus === 'All' || product.status === selectedStatus;
-    return matchesSearch && matchesStatus;
+    const matchesCategory = selectedCategory === 'All' || (product.category || 'other').toLowerCase() === selectedCategory.toLowerCase();
+    return matchesSearch && matchesStatus && matchesCategory;
   });
 
   const getStatusColor = (status) => {
@@ -188,6 +190,17 @@ export default function MyProductsScreen({ navigation }) {
           </TouchableOpacity>
         ))}
       </ScrollView>
+
+      {selectedCategory !== 'All' && (
+        <View style={styles.categoryFilterBar}>
+          <Text style={styles.categoryFilterText}>
+            Category: {selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)}
+          </Text>
+          <TouchableOpacity onPress={() => setSelectedCategory('All')}>
+            <Text style={styles.categoryFilterClear}>Clear</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {filteredProducts.length === 0 ? (
         <View style={styles.emptyContainer}>
@@ -337,6 +350,27 @@ const styles = StyleSheet.create({
   statusScroll: {
     paddingHorizontal: 16,
     marginBottom: 16,
+  },
+  categoryFilterBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#e8f5e9',
+    marginHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  categoryFilterText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2e7d32',
+  },
+  categoryFilterClear: {
+    fontSize: 14,
+    color: '#666',
+    textDecorationLine: 'underline',
   },
   statusChip: {
     paddingHorizontal: 16,

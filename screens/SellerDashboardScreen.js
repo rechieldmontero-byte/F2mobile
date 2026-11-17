@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput } from 'react-native';
 import { supabase } from '../lib/supabase';
 
 export default function SellerDashboardScreen({ navigation }) {
@@ -18,6 +18,16 @@ export default function SellerDashboardScreen({ navigation }) {
     },
   });
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const categoryIcons = {
+    fruits: '🍎',
+    vegetables: '🥬',
+    meats: '🍗',
+    dairy: '🥛',
+    grains: '🌾',
+    other: '📦',
+  };
 
   useEffect(() => {
     fetchStats();
@@ -122,6 +132,37 @@ export default function SellerDashboardScreen({ navigation }) {
           <Text style={styles.welcomeSubtitle}>Manage your farm and sales</Text>
         </View>
 
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search products..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholderTextColor="#999"
+          />
+        </View>
+
+        <View style={styles.categorySection}>
+          <Text style={styles.categoryTitle}>Products by Category</Text>
+          <View style={styles.categoryList}>
+            {['fruits', 'vegetables', 'meats', 'dairy', 'grains', 'other']
+              .filter(cat => cat.includes(searchQuery.toLowerCase()))
+              .map((category) => (
+                <TouchableOpacity
+                  key={category}
+                  style={styles.categoryItem}
+                  onPress={() => navigation.navigate('MyProducts', { category })}
+                >
+                  <View style={styles.categoryLeft}>
+                    <Text style={styles.categoryIcon}>{categoryIcons[category]}</Text>
+                    <Text style={styles.categoryName}>{category.charAt(0).toUpperCase() + category.slice(1)}</Text>
+                  </View>
+                  <Text style={styles.categoryCount}>{stats.categories[category] || 0}</Text>
+                </TouchableOpacity>
+              ))}
+          </View>
+        </View>
+
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{stats.products}</Text>
@@ -138,18 +179,6 @@ export default function SellerDashboardScreen({ navigation }) {
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{stats.pending}</Text>
             <Text style={styles.statLabel}>Pending</Text>
-          </View>
-        </View>
-
-        <View style={styles.categorySection}>
-          <Text style={styles.categoryTitle}>Products by Category</Text>
-          <View style={styles.categoryList}>
-            {['fruits', 'vegetables', 'meats', 'dairy', 'grains', 'other'].map((category) => (
-              <View key={category} style={styles.categoryItem}>
-                <Text style={styles.categoryName}>{category.charAt(0).toUpperCase() + category.slice(1)}</Text>
-                <Text style={styles.categoryCount}>{stats.categories[category] || 0}</Text>
-              </View>
-            ))}
           </View>
         </View>
       </ScrollView>
@@ -216,6 +245,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
   },
+  searchContainer: {
+    marginBottom: 16,
+  },
+  searchInput: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 14,
+    elevation: 1,
+  },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -266,9 +306,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  categoryLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  categoryIcon: {
+    fontSize: 24,
   },
   categoryName: {
     fontSize: 14,
