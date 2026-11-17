@@ -1,7 +1,96 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { supabase } from '../lib/supabase';
 
 export default function SellerDashboardScreen({ navigation }) {
+  const [stats, setStats] = useState({
+    products: 0,
+    revenue: 0,
+    orders: 0,
+    pending: 0,
+    categories: {},
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Fetch seller's products
+      const { data: products } = await supabase
+        .from('products')
+        .select('id, category')
+        .eq('user_id', user.id);
+
+      const productCount = products?.length || 0;
+      const categories = {};
+      products?.forEach(p => {
+        categories[p.category] = (categories[p.category] || 0) + 1;
+      });
+
+      // Fetch seller's product IDs
+      const productIds = products?.map(p => p.id) || [];
+
+      // Fetch order items for seller's products
+      let revenue = 0;
+      let orders = 0;
+      let pending = 0;
+
+      if (productIds.length > 0) {
+        const { data: orderItems } = await supabase
+          .from('order_items')
+          .select('order_id, quantity, price')
+          .in('product_id', productIds);
+
+        const orderIds = [...new Set(orderItems?.map(oi => oi.order_id) || [])];
+
+        if (orderIds.length > 0) {
+          const { data: orderData } = await supabase
+            .from('orders')
+            .select('id, status')
+            .in('id', orderIds);
+
+          orders = orderIds.length;
+          pending = orderData?.filter(o => o.status === 'pending' || o.status === 'confirmed').length || 0;
+
+          // Calculate revenue from order items
+          revenue = orderItems?.reduce((sum, item) => {
+            return sum + (parseFloat(item.price) * item.quantity);
+          }, 0) || 0;
+        }
+      }
+
+      setStats({
+        products: productCount,
+        revenue,
+        orders,
+        pending,
+        categories,
+      });
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Seller Dashboard</Text>
+        </View>
+        <View style={styles.loadingContainer}>
+          <Text>Loading...</Text>
+        </View>
+      </View>
+    );
+  }
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -16,22 +105,36 @@ export default function SellerDashboardScreen({ navigation }) {
 
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>0</Text>
+            <Text style={styles.statValue}>{stats.products}</Text>
             <Text style={styles.statLabel}>Products</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>₱0</Text>
+            <Text style={styles.statValue}>₱{stats.revenue.toLocaleString()}</Text>
             <Text style={styles.statLabel}>Revenue</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>0</Text>
+            <Text style={styles.statValue}>{stats.orders}</Text>
             <Text style={styles.statLabel}>Orders</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>0</Text>
+            <Text style={styles.statValue}>{stats.pending}</Text>
             <Text style={styles.statLabel}>Pending</Text>
           </View>
         </View>
+
+        {Object.keys(stats.categories).length > 0 && (
+          <View style={styles.categorySection}>
+            <Text style={styles.categoryTitle}>Products by Category</Text>
+            <View style={styles.categoryList}>
+              {Object.entries(stats.categories).map(([category, count]) => (
+                <View key={category} style={styles.categoryItem}>
+                  <Text style={styles.categoryName}>{category}</Text>
+                  <Text style={styles.categoryCount}>{count}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
       </ScrollView>
 
       <View style={styles.bottomNav}>
@@ -120,6 +223,45 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
     textAlign: 'center',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  categorySection: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    elevation: 1,
+  },
+  categoryTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 12,
+  },
+  categoryList: {
+    gap: 8,
+  },
+  categoryItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  categoryName: {
+    fontSize: 14,
+    color: '#333',
+    textTransform: 'capitalize',
+  },
+  categoryCount: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1b5e20',
   },
   bottomNav: {
     flexDirection: 'row',
