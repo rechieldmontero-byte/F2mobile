@@ -24,19 +24,24 @@ export default function AnalyticsScreen({ navigation }) {
 
       const [productsRes, ordersRes] = await Promise.all([
         supabase.from('products').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
-        supabase.from('orders').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+        supabase.from('orders').select('*').order('created_at', { ascending: false }),
       ]);
 
-      const orders = ordersRes.data || [];
-      const revenue = orders.reduce((sum, o) => sum + (parseFloat(o.total_amount) || 0), 0);
-      const pending = orders.filter(o => o.status === 'pending' || o.status === 'confirmed').length;
+      // RLS returns own orders + orders containing seller's products
+      const allOrders = ordersRes.data || [];
+      const ownOrders = allOrders.filter((o) => o.user_id === user.id);
+      const salesOrders = allOrders.filter((o) => o.user_id !== user.id);
+
+      const revenue = salesOrders.reduce((sum, o) => sum + (parseFloat(o.total_amount) || 0), 0);
+      const pending = allOrders.filter(o => o.status === 'pending' || o.status === 'confirmed').length;
 
       setStats({
         products: productsRes.count || 0,
-        orders: orders.length,
+        orders: salesOrders.length,
+        purchases: ownOrders.length,
         revenue,
         pending,
-        recentOrders: orders.slice(0, 5),
+        recentOrders: allOrders.slice(0, 5),
       });
     } catch (error) {
       console.error('Error fetching analytics:', error);
@@ -107,7 +112,12 @@ export default function AnalyticsScreen({ navigation }) {
           <View style={styles.statCard}>
             <Text style={styles.statIcon}>📋</Text>
             <Text style={styles.statValue}>{stats.orders}</Text>
-            <Text style={styles.statLabel}>Total Orders</Text>
+            <Text style={styles.statLabel}>Sales Orders</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statIcon}>🛒</Text>
+            <Text style={styles.statValue}>{stats.purchases || 0}</Text>
+            <Text style={styles.statLabel}>My Purchases</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statIcon}>💰</Text>

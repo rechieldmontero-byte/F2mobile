@@ -6,6 +6,7 @@ export default function OrdersScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [orders, setOrders] = useState([]);
+  const [currentUserId, setCurrentUserId] = useState(null);
 
   useEffect(() => {
     fetchOrders();
@@ -18,6 +19,7 @@ export default function OrdersScreen({ navigation }) {
         setOrders([]);
         return;
       }
+      setCurrentUserId(user.id);
       const { data, error } = await supabase
         .from('orders')
         .select('*')
@@ -52,6 +54,26 @@ export default function OrdersScreen({ navigation }) {
       case 'pending': return '#f9a825';
       case 'cancelled': return '#c62828';
       default: return '#1565c0';
+    }
+  };
+
+  const paymentMethodLabel = (method) => {
+    switch (method) {
+      case 'gcash': return 'GCash';
+      case 'maya': return 'Maya';
+      case 'bank': return 'Bank Transfer';
+      case 'cod': return 'Cash on Delivery';
+      default: return method || 'Not set';
+    }
+  };
+
+  const paymentStatusColor = (status) => {
+    switch (status) {
+      case 'paid': return '#2e7d32';
+      case 'submitted': return '#1565c0';
+      case 'failed': return '#c62828';
+      case 'refunded': return '#f9a825';
+      default: return '#888';
     }
   };
 
@@ -96,11 +118,28 @@ export default function OrdersScreen({ navigation }) {
               <View key={order.id} style={styles.orderCard}>
                 <View style={styles.orderHeader}>
                   <Text style={styles.orderId}>Order #{order.id.slice(0, 8)}</Text>
-                  <View style={[styles.statusBadge, { backgroundColor: statusColor(order.status) }]}>
-                    <Text style={styles.statusText}>{order.status}</Text>
+                  <View style={styles.headerBadges}>
+                    {currentUserId && order.user_id !== currentUserId && (
+                      <View style={styles.saleBadge}>
+                        <Text style={styles.saleBadgeText}>Sale</Text>
+                      </View>
+                    )}
+                    <View style={[styles.statusBadge, { backgroundColor: statusColor(order.status) }]}>
+                      <Text style={styles.statusText}>{order.status}</Text>
+                    </View>
                   </View>
                 </View>
                 <Text style={styles.orderItems}>{getItemsSummary(order.items) || 'Items'}</Text>
+                <View style={styles.paymentRow}>
+                  <Text style={styles.paymentText}>
+                    💳 {paymentMethodLabel(order.payment_method)}
+                  </Text>
+                  {order.payment_status && (
+                    <View style={[styles.payBadge, { backgroundColor: paymentStatusColor(order.payment_status) }]}>
+                      <Text style={styles.payBadgeText}>{order.payment_status}</Text>
+                    </View>
+                  )}
+                </View>
                 <View style={styles.orderFooter}>
                   <Text style={styles.orderDate}>{formatDate(order.created_at)}</Text>
                   <Text style={styles.orderTotal}>₱{parseFloat(order.total_amount || 0).toLocaleString()}</Text>
@@ -195,6 +234,23 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 12,
   },
+  headerBadges: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  saleBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: '#fff3e0',
+  },
+  saleBadgeText: {
+    color: '#e65100',
+    fontSize: 10,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+  },
   statusText: {
     color: '#fff',
     fontSize: 11,
@@ -204,7 +260,29 @@ const styles = StyleSheet.create({
   orderItems: {
     fontSize: 13,
     color: '#666',
+    marginBottom: 8,
+  },
+  paymentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 10,
+  },
+  paymentText: {
+    fontSize: 12,
+    color: '#555',
+    fontWeight: '500',
+  },
+  payBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  payBadgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: 'bold',
+    textTransform: 'capitalize',
   },
   orderFooter: {
     flexDirection: 'row',

@@ -46,14 +46,33 @@ export default function CheckoutScreen({ navigation, route }) {
         price: parseFloat(item.price) || 0,
       }));
 
-      const { error } = await supabase.from('orders').insert({
+      const { data: order, error } = await supabase.from('orders').insert({
         user_id: user.id,
         status: 'pending',
+        payment_method: paymentMethod,
+        payment_reference: paymentMethod === 'cod' ? null : referenceNumber.trim(),
+        payment_status: paymentMethod === 'cod' ? 'pending' : 'submitted',
         total_amount: total,
         items: orderItems,
-      });
+      }).select().single();
 
       if (error) throw error;
+
+      // Insert normalized order_items for valid product UUIDs (seller order tracking)
+      if (order?.id) {
+        const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        const orderItemRows = orderItems
+          .filter((i) => UUID_RE.test(i.product_id))
+          .map((i) => ({
+            order_id: order.id,
+            product_id: i.product_id,
+            quantity: i.quantity,
+            price: i.price,
+          }));
+        if (orderItemRows.length > 0) {
+          await supabase.from('order_items').insert(orderItemRows);
+        }
+      }
 
       showAlert(
         'Order Placed!',

@@ -22,7 +22,9 @@
       "bundleIdentifier": "com.agrihub.app"
     },
     "web": {
-      "bundler": "metro"
+      "bundler": "metro",
+      "output": "single",
+      "baseUrl": "/F2mobile"
     },
     "plugins": [
       [

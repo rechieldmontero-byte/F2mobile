@@ -100,11 +100,19 @@ CREATE TABLE IF NOT EXISTS orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   status TEXT DEFAULT 'pending',
+  payment_method TEXT,
+  payment_reference TEXT,
+  payment_status TEXT DEFAULT 'pending',
   total_amount DECIMAL(10,2) NOT NULL,
   items JSONB NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Add payment columns if orders table already existed
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_reference TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_status TEXT DEFAULT 'pending';
 
 -- ============================================
 -- 4. ORDER_ITEMS TABLE (optional - normalized)
@@ -199,11 +207,35 @@ DROP POLICY IF EXISTS "Users can create own orders" ON orders;
 
 CREATE POLICY "Users can read own orders"
   ON orders FOR SELECT
-  USING (auth.uid() = user_id);
+  USING (
+    auth.uid() = user_id OR
+    EXISTS (
+      SELECT 1 FROM order_items oi
+      JOIN products p ON p.id = oi.product_id
+      WHERE oi.order_id = orders.id AND p.user_id = auth.uid()
+    )
+  );
 
 CREATE POLICY "Users can create own orders"
   ON orders FOR INSERT
   WITH CHECK (auth.uid() = user_id);
+
+-- Order Items policies (normalized order lines)
+DROP POLICY IF EXISTS "Users can read own order items" ON order_items;
+DROP POLICY IF EXISTS "Users can insert own order items" ON order_items;
+
+CREATE POLICY "Users can read own order items"
+  ON order_items FOR SELECT
+  USING (
+    EXISTS (SELECT 1 FROM orders o WHERE o.id = order_items.order_id AND o.user_id = auth.uid()) OR
+    EXISTS (SELECT 1 FROM products p WHERE p.id = order_items.product_id AND p.user_id = auth.uid())
+  );
+
+CREATE POLICY "Users can insert own order items"
+  ON order_items FOR INSERT
+  WITH CHECK (
+    EXISTS (SELECT 1 FROM orders o WHERE o.id = order_items.order_id AND o.user_id = auth.uid())
+  );
 
 -- Saved Products policies
 DROP POLICY IF EXISTS "Users can read own saved products" ON saved_products;
