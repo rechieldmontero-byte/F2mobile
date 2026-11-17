@@ -14,82 +14,59 @@ export default function SellerDashboardScreen({ navigation }) {
           <Text style={styles.welcomeSubtitle}>Manage your farm and sales</Text>
         </View>
 
-        <View style={styles.menuList}>
+        <View style={styles.dashboardGrid}>
           <TouchableOpacity
-            style={styles.menuRow}
-            onPress={() => navigation.navigate('Home')}
-          >
-            <View style={styles.menuIconSmall}>
-              <Text style={styles.iconEmoji}>📊</Text>
-            </View>
-            <Text style={styles.menuRowLabel}>Dashboard Overview</Text>
-            <Text style={styles.menuArrow}>→</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.menuRow}
-            onPress={() => navigation.navigate('MyProducts')}
-          >
-            <View style={styles.menuIconSmall}>
-              <Text style={styles.iconEmoji}>📦</Text>
-            </View>
-            <Text style={styles.menuRowLabel}>My Products</Text>
-            <Text style={styles.menuArrow}>→</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.menuRow}
-            onPress={() => navigation.navigate('Add', { mode: 'listing' })}
-          >
-            <View style={styles.menuIconSmall}>
-              <Text style={styles.iconEmoji}>➕</Text>
-            </View>
-            <Text style={styles.menuRowLabel}>Add Product</Text>
-            <Text style={styles.menuArrow}>→</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.menuRow}
-            onPress={() => navigation.navigate('Orders')}
-          >
-            <View style={styles.menuIconSmall}>
-              <Text style={styles.iconEmoji}>🛍️</Text>
-            </View>
-            <Text style={styles.menuRowLabel}>Order Management</Text>
-            <Text style={styles.menuArrow}>→</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.menuRow}
+            style={styles.dashboardCard}
             onPress={() => navigation.navigate('Analytics')}
           >
-            <View style={styles.menuIconSmall}>
-              <Text style={styles.iconEmoji}>💰</Text>
-            </View>
-            <Text style={styles.menuRowLabel}>Sales and Earnings</Text>
-            <Text style={styles.menuArrow}>→</Text>
+            <Text style={styles.dashboardIcon}>📊</Text>
+            <Text style={styles.dashboardTitle}>Sales and Earnings</Text>
+            <Text style={styles.dashboardSubtitle}>View revenue & orders</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.menuRow}
+            style={styles.dashboardCard}
+            onPress={() => navigation.navigate('Orders')}
+          >
+            <Text style={styles.dashboardIcon}>🛍️</Text>
+            <Text style={styles.dashboardTitle}>Order Management</Text>
+            <Text style={styles.dashboardSubtitle}>Track incoming orders</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.dashboardCard}
+            onPress={() => navigation.navigate('MyProducts')}
+          >
+            <Text style={styles.dashboardIcon}>📦</Text>
+            <Text style={styles.dashboardTitle}>My Products</Text>
+            <Text style={styles.dashboardSubtitle}>Manage listings</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.dashboardCard}
+            onPress={() => navigation.navigate('Add', { mode: 'listing' })}
+          >
+            <Text style={styles.dashboardIcon}>➕</Text>
+            <Text style={styles.dashboardTitle}>Add Product</Text>
+            <Text style={styles.dashboardSubtitle}>Create new listing</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.dashboardCard}
             onPress={() => navigation.navigate('Notifications')}
           >
-            <View style={styles.menuIconSmall}>
-              <Text style={styles.iconEmoji}>💬</Text>
-            </View>
-            <Text style={styles.menuRowLabel}>Messages</Text>
-            <Text style={styles.menuArrow}>→</Text>
+            <Text style={styles.dashboardIcon}>💬</Text>
+            <Text style={styles.dashboardTitle}>Messages</Text>
+            <Text style={styles.dashboardSubtitle}>Buyer inquiries</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.menuRow}
+            style={styles.dashboardCard}
             onPress={() => navigation.navigate('Profile')}
           >
-            <View style={styles.menuIconSmall}>
-              <Text style={styles.iconEmoji}>👤</Text>
-            </View>
-            <Text style={styles.menuRowLabel}>Seller Profile</Text>
-            <Text style={styles.menuArrow}>→</Text>
+            <Text style={styles.dashboardIcon}>👤</Text>
+            <Text style={styles.dashboardTitle}>Seller Profile</Text>
+            <Text style={styles.dashboardSubtitle}>Account settings</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -156,42 +133,35 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
   },
-  menuList: {
+  dashboardGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  dashboardCard: {
+    width: '48%',
     backgroundColor: '#fff',
     borderRadius: 12,
-    marginBottom: 20,
+    padding: 20,
+    marginBottom: 16,
+    alignItems: 'center',
     elevation: 1,
-    overflow: 'hidden',
   },
-  menuRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+  dashboardIcon: {
+    fontSize: 32,
+    marginBottom: 12,
   },
-  menuIconSmall: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#e8f5e9',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 14,
-  },
-  iconEmoji: {
-    fontSize: 20,
-  },
-  menuRowLabel: {
-    flex: 1,
-    fontSize: 15,
+  dashboardTitle: {
+    fontSize: 14,
     fontWeight: '600',
     color: '#333',
+    textAlign: 'center',
+    marginBottom: 4,
   },
-  menuArrow: {
-    fontSize: 18,
+  dashboardSubtitle: {
+    fontSize: 11,
     color: '#999',
+    textAlign: 'center',
   },
   bottomNav: {
     flexDirection: 'row',
